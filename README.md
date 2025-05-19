@@ -76,6 +76,8 @@ _ReporTree_ is a flexible pipeline that facilitates the [detection of genetic cl
 - Monitoring genetic clusters and perform their characterization in routine surveillance
 - Determine genetic clusters at all possible threshold levels using a cg/wgMLST or a SNP-based approach
 - Perform a dynamic zoom-in analysis of an outbreak cluster, extending the static cgMLST with accessory loci that are present in this cluster
+
+**NOTE: ReporTree outputs can be used as input for any of the above-mentioned tools (DownTree.py, PanTree.py and EvalTree.py)!!**
   
 You can find more details about the usage of this tool in [ReporTree's page](https://github.com/insapathogenomics/ReporTree).
 
