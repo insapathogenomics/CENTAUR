@@ -50,7 +50,7 @@ _Note: if a previous cgMLST schema or a multi-sequence alignment are available, 
 You can find more details about the usage of this tool in [PanTree's page](https://github.com/vmixao/CENTAUR/blob/main/PanTree/README.md).
 
 ## _EvalTree_
-_EvalTree.py_ was designed to automate a [[previously developed methodology](https://github.com/insapathogenomics](https://github.com/insapathogenomics/WGS_cluster_congruence)) for evaluation of congruence between two clustering analysis ([Mixão et al. 2025](https://www.nature.com/articles/s41467-025-59246-8)).
+_EvalTree.py_ was designed to automate a [previously developed methodology](https://github.com/insapathogenomics/WGS_cluster_congruence) for evaluation of congruence between two clustering analysis ([Mixão et al. 2025](https://www.nature.com/articles/s41467-025-59246-8)).
 
 #### Possible applications
 - Comparison of the WGS-based pipelines in place at two different laboratories, facilitating inter-laboratory communication and cooperation and promoting large-scale External Quality Assessments
