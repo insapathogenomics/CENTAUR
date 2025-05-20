@@ -134,6 +134,9 @@ Warning: Make sure you are inside the EvalTree/scripts directory before running 
 ```bash
 git clone https://github.com/insapathogenomics/WGS_cluster_congruence
 git clone https://github.com/insapathogenomics/ComparingPartitions
+
+cd ..
+
 conda env create --name evaltree --file=evaltree_env.yml
 ```
 
@@ -205,7 +208,7 @@ Outbreak
                         threshold. Full attention, this argument has its own structure: two threshold (strings-methods) and the type of comparison is either equal (defined by , ) or lower_equal (defined by
                         <= ) Threshold1: Threshold at which the genetic clusters must be identified for the pipeline of interest. Threshold2: Threshold at which the genetic clusters must be searched in the
                         other pipelines. Comparison (equal or lower equal): - equal: Used to assess whether a cluster is detected at a given threshold by another pipeline. Use a comma , to separate
-                        threshold1,threshold2. Example of expression: MST-7x1.0,MST-7x1.0. - lower_equal: Used to assess whether a cluster is detected up to a given threshold in another pipeline. Use <=
+                        threshold1,threshold2. Example of expression: "MST-7x1.0,MST-7x1.0". - lower_equal: Used to assess whether a cluster is detected up to a given threshold in another pipeline. Use <=
                         between threshold1<=threshold2. Example of expression: MST-7x1.0<=MST-9x1.0. For multiple pair of threshold values, use ; as a separator. Example of expression:
                         "MST-7x1.0,MST-7x1.0;<=MST-7x1.0,MST-10x1.0" represents two pair of threshold values.
 
@@ -214,13 +217,13 @@ Outbreak
 
 ```
 
-### Simple EvalTree command line with  two input ReporTree folders 
+### A simple EvalTree command line example using two input ReporTree folders 
 ```bash
-evaltree.py -i1 input1 -i2 input2 -o output -ps partitions_summary -pt MST-7x1.0 -cp name_column -to "MST-7x1.0,MST-7x1.0;<=MST-7x1.0,MST-9x1.0"
+EvalTree.py -i1 input1 -i2 input2 -o output -ps partitions_summary -pt MST-7x1.0 -cp name_column -to "MST-7x1.0,MST-7x1.0;<=MST-7x1.0,MST-9x1.0"
 ```
-### Simple EvalTree command line with  two files 
+### A simple EvalTree command line example using two files 
 ```bash
-evaltree.py -i1 X_partitions.tsv -i2 Y_partitions.tsv -o output
+EvalTree.py -i1 X_partitions.tsv -i2 Y_partitions.tsv -o output
 ```
   
 ## Citation
