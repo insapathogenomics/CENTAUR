@@ -129,15 +129,18 @@ cd CENTAUR/EvalTree
 mkdir scripts
 cd scripts
 ```
-Warning: Make sure you are inside the EvalTree/scripts directory before running the commands below.
+Warning: Make sure you are inside the EvalTree/scripts directory before cloning insapathogenomics/WGS_cluster_congruence and insapathogenomics/ComparingPartitions.
 
 ```bash
 git clone https://github.com/insapathogenomics/WGS_cluster_congruence
 git clone https://github.com/insapathogenomics/ComparingPartitions
+```
 
+Warning: Make sure you are inside the EvalTree directory.
+```bash
 cd ..
 
-conda env create --name evaltree --file=evaltree_env.yml
+conda env create --name EvalTree --file=EvalTree_env.yml
 ```
 
 Run pytest to check that your installation was successful in the EvalTree directory:
@@ -148,7 +151,7 @@ pytest
 
 Run EvalTree:
 ```bash
-python evaltree.py -h
+python EvalTree.py -h
 ```
 
 ### Dependencies:
