@@ -1,14 +1,13 @@
 #!/usr/bin/env	python3                             
 
 """
-Evaluate the congruence between two partition matrix with the clusters data for all ReporTree thersholds.
-
+EvalTree: toolbox for comparative clustering evaluation of whole genome sequencing (WGS) pipelines for bacteria routine surveillance
 By Joana Gomes Pereira
 @INSA
 
 """
 version = "1.0.0"
-last_updated = "2024-11-XX"
+last_updated = "2025-05-20"
 
 import datetime
 import argparse
@@ -33,7 +32,7 @@ import math
 def get_path_toolbox():
 
     """
-    Retrives the absolute path to the current script (evaltree.py) and its respective directory.
+    Retrieves the absolute path to the current script (EvalTree.py) and its respective directory.
     This is useful for correctly managing file paths relative to the script's location.
 
     Parameters
@@ -57,11 +56,11 @@ def get_path_toolbox():
 def get_path_other_scripts(directory_toolbox):
 
     """
-    Constructs the paths to locate the scripts that evaluates the pipeline congruence based from the toolbox directory.
+    Constructs the paths to locate the scripts that evaluate the pipeline congruence based from the toolbox directory.
     The following scripts are included:
 
     -**comparing_partition_v2.py** (Mixão et al., 2024): 
-        This script have two analysis options: between_methods and stability.
+        This script has two analysis options: between_methods and stability.
         - The *between_methods* option compares methods from two pipelines to compute the congruence score, assessing the consistency between them. 
         - The *stability* option evaluates the cluster stability produced by a given method.
 
@@ -91,7 +90,7 @@ def get_path_other_scripts(directory_toolbox):
         Path to the script get_best_part_correspondence.py. 
         
     remove_hifen_script: str
-        Path to the script remove_hifen_script.py.        
+        Path to the script remove_hifen.py.        
         
     stats_outbreak_script: str
         Path to the script stats_outbreak_script.py.
@@ -2249,7 +2248,7 @@ def create_html(log, file_path_report):
     #print_log(f'\n---------------------------------------------- Function: create_html----------------------------------------------\n',log)
     
     name_file=os.path.basename(file_path_report)      
-    title="Report ToolBox"
+    title="Report EvalTree"
         
     html_content= f"""<!DOCTYPE html>
 <html>
@@ -2322,7 +2321,7 @@ def create_html(log, file_path_report):
 <body>
     <header>
         <h1>Report</h1>
-        <p>Toolbox for comparative clustering evaluation of 
+        <p>EvalTree: toolbox for comparative clustering evaluation of 
         whole genome sequencing pipelines for bacteria routine surveillance</p>
     </header>"""
 
@@ -2582,7 +2581,7 @@ def print_log(message, log):
 
 #####################################################################################################################################
 ###################################################################***###############################################################
-###############################################################***ToolBox***##########################################################
+###############################################################***EvalTree***##########################################################
 ###################################################################***###############################################################
 #####################################################################################################################################
 
@@ -2604,7 +2603,7 @@ def main():
     #  Configures the parser for command line arguments
 
     parser = argparse.ArgumentParser(description="Running EvalTree")
-    parser = argparse.ArgumentParser(prog="evaltree.py",
+    parser = argparse.ArgumentParser(prog="EvalTree.py",
                                     formatter_class=argparse.RawDescriptionHelpFormatter,
                                     description=textwrap.dedent("""                                                                                                                                   
     EvalTree.py
@@ -3210,8 +3209,8 @@ def main():
     #----------------------------------------------------------------------------------------------------------------------------
     #END INFORMATIONS
     
-    #print_log("\nEND Running toolbox.py ...\n", log)
-    print_log('Toolbox is done! If you found any issue please contact us.\n', log)
+    #print_log("\nEND Running EvalTree.py ...\n", log)
+    print_log('Evaltree is done! If you found any issue please contact us.\n', log)
     end = datetime.datetime.now()
     elapsed = end - start
     print_log("\nEnd: " + str(end), log)
