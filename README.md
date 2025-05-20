@@ -42,7 +42,7 @@ _PanTree.py_ was designed to evaluate loci prevalence and allele diversity, and 
 - Species tree (NWK)
 - Clustering information based on a previously used typing method
 
-_Note: if a previous cgMLST schema or a multi-sequence alignment are available, we strongly recomend that you use the tree and the partitions.tsv file of [ReporTree](https://github.com/insapathogenomics/ReporTree)_  
+_Note: if a previous cgMLST schema or a multi-sequence alignment are available, we strongly recomend that you use the tree and the partitions.tsv file of [ReporTree](https://github.com/insapathogenomics/ReporTree), which provides clustering information at all possible threshold levels for a dataset._  _  
 
 #### Output
 - TSV file with information about the prevalence of each cg/wgMLST loci in the dataset, their allelic diversity and distribution across clusters identified at level X
