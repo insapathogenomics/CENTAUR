@@ -1,84 +1,54 @@
 # EvalTree
-Toolbox for comparative clustering evaluation of Whole-Genome Sequencing (WGS) pipelines for routine bacterial surveillance.
-Evaltree is a tool developed within the Centaur framework that aims to promote integrated epidemiological surveillance in a One-Health programme.
-Thus, contributing to a more efficient response to outbreak scenarios and preventing the spread of infectious diseases, any bacterial pathogen X.
+_EvalTree.py_ is a tool developed in the frame of the CENTAUR project (supported by the European ISIDORe initiative) that, among other features, **compares cluster composition at all possible resolution levels between two typing solutions, and their performance in identifying similar outbreak signals**.
 
-It can be useful in investigating at least four scenarios in genomic surveillance:
-
-- Compare the performance of WGS pipelines between laboratories.
-
-- Compare the resolution between well-established schemes and new ones.
-
-- Promoting the long-term sustainability of pipelines (updates, versions, parameters).
-
-- Comparison between cg/wgMLST schemes and traditional typing methods (serotypes, sequence-type, clonal complex).
-
-EvalTree aims to support laboratories by:
-
-- Automating routine tasks, reducing the risk of error and saving time.
-
-- Simplifying the evaluation of congruence between two pipelines, eliminating the need to run scripts individually, and promoting reproducibility and confidence in the results.
-
-- Generating reports with interactive plots, allowing users explore the data. This makes interpretation less time-consuming and demanding, while also facilitating data sharing.
-
-- Contributing to the standardization of results, promoting communication between national reference laboratories and other EU members, and strengthening collaboration and result comparability.
-
-- Being easily implemented by laboratories with lower expertise and to have a simple installation process.
-
+## Possible applications
+- Comparison of the WGS-based pipelines in place at two different laboratories, facilitating inter-laboratory communication and cooperation and promoting large-scale External Quality Assessments
+- Comparison of two different versions of the same WGS-based pipeline, providing confidence in the implementation of pipeline updates, promoting the long.term sustainability of pipelines
+- Comparison of different WGS-based pipeline components - useful during cg/wgMLST schema creation
+- Comparison of a WGS-based pipeline and traditional typing classification, providing information about backwards comparability and, thus, supporting the technological transition to WGS
 
 ## Implementation
 
-EvalTree is a command-line tool implemented in Python 3.8, able to create user-friendly reports by orchestrating the scripts developed by Mixão et. al., 2025. 
-It is highly recommended that inputs be originated using ReporTree software available in [insapathogenomics/ReporTree](https://github.com/insapathogenomics/ReporTree) to ensure optimal functionality. 
+_EvalTree.py_ is a command-line tool, implemented in Python 3.8, able to provide user-friendly reports of cluster congruence assessments between two typing pipelines. This tool orchestrates the methodology developed by [Mixão et al. 2025](https://www.nature.com/articles/s41467-025-59246-8).
 
-## Inputs
+## Input
+_EvalTree.py_ is designed primarily to make comparisons between the typing classification obtained by two different methods (e.g. cgMLST, sequence type, serotype, clonal complex, etc.). For each pipeline/typing system under comparison, one of the following input types can be provided:
+- Folder with the [ReporTree](https://github.com/insapathogenomics/ReporTree) run
+- TSV file with the clustering information at one (e.g. sequence type or serotype) or multiple levels (e.g. cgMLST clustering)
+  
+_EvalTree.py_ is able to accept typing information from different origins as input, as far as a TSV file in which rows correspond to samples and column(s) correspond to the typing classification method/level is provided for each method under comparison. Still, if you used [ReporTree](https://github.com/insapathogenomics/ReporTree) to obtain your cgMLST clusters, you can provide your output ReporTree folder as input to _EvalTree.py_ and this tool will use ReporTree output files for additional analyses:
+- _partitions.tsv_: The main input. It contains clustering information at all possible distance thresholds, and will be used for the cluster congruence assessment with the other method.
+- _clusterComposition.tsv_: File that summarizes the clusters and singletons identified at each threshold level. This file can be used for an in-depth analysis at potential outbreak-level (as specified by the user).
+- _partitions_summary.tsv_: Characterization of genetic clusters with the available metadata. This file can be used in order to also provide a graphical visualization of the composition of the clusters, according to user's specifications.
+- _SAMPLES_OF_INTEREST_partitions_summary.tsv_ - similar to _partitions_summary.tsv_ but exclusively for the samples of interest. If the user specifies that the graphical visualization should only be performed for clusters with "samples of interst", this file is used by _EvalTree.py_ instead of the _partitions_summary.tsv_.
+- _stableRegions.tsv_: File that reports the stability regions observed in a pipeline. This file is used by _EvalTree.py_for a graphical representation of these regions in the pipeline characterization.
 
-EvalTree is a tool designed primarily to make comparisons between two inputs.
-The inputs can be folders (a ReporTree folder is recommended) or files (partition files or other types of files with classifications (e.g., sequence-type, serotypes, etc.) are recommended).
-When ReporTree folders are provided, the tool can process 5 types of files (described below), according to the instructions provided on the command line. 
-Optionally, only one ReporTree folder can be entered, but only the functionalities of visualising clustering plots resulting from partitions_summary or sample_of_interest and the pipeline characterisation section are available.
+## Output
+The main output file of _EvalTree.py_ is an **HTML report** containing interactive Plotly visualisations of all the results generated from an analysis. This report is divided into two main sections:    
+  
+**1. Pipeline characterization** (this section is provided for each typing method under comparison)  
+- Displays the name of the pipeline
+- Shows the number of samples and thresholds used
+- Includes a scarlet plot illustrating the number of partitions (clusters) per threshold/classification system
 
-- Description files:
-    - partitions.tsv: The main input. It contains all genetic partitions (clusters) across each allele distance threshold.
-      
-    - clusterComposition.tsv: File that categorizes samples as part of a cluster or as singletons for each threshold, and reports the size of each cluster and the singleton.
-      
-    - partitions_summary.tsv: Describe per threshold and cluster associated metadata (e.g., country, source). File also report changes in the clusters across the thresholds, including: nomenclature change (indicates if a cluster has changed compared to the previous partition (kept, split, merged, etc.), n_increases (indicating the number of new samples added to the cluster), and size of the cluster. Nomenclature change is better explained in [insapathogenomics/ReporTree](https://github.com/insapathogenomics/ReporTree)
-      
-    - sample_of_interest_partitions_summary.tsv:  Similar to partitions_summary.tsv, but exclusively for the samples of interest.
-      
-    - stableRegions.tsv: Identify stability regions in each pipeline, where the cluster composition is stable across five consecutive thresholds and with an Adjusted Wallace coefficient above 0.99.
+If a ReporTree folder is provided as input, this section may also show:
+- A graphical representation of the stability regions identified in each pipeline
+- Pie charts with the characterization of the genetic clusters observed at a (or multiple) user-defined threshold(s) according to the metadata variable indicated by the user
 
-## Main output files
+**2. Congruence analysis**  
+- Heatmap indication the congruence score obtained from the pairwise comparisons at all possible threshold levels
+- A scatterplot indicating the inter-pipeline corresponding points and their respective trend line 
 
-An HTML-based report is generated, containing interactive Plotly visualisations built from the accessory files produced during script orchestration.
-The document adopts a hierarchical accordion structure, organized into two main sections (characterization and congruence) and two optional sections (clustering and outbreaks).
+If a ReporTree folder is provided as input, this section may also show:
+- Graphical representation of the ability of the two pipelines to detect the same outbreak signals
 
-- Pipeline characterization:
-    - Displays the executed command line and the name of the pipeline.
-    - Shows the number of samples analysed and the thresholds used.
-    - Includes a scarlet plot illustrating the number of partitions per threshold.
-
-- Congruence between two pipelines:
-    - Compares the clustering results of pipelines across all resolution levels, visualized using a heatmap. 
-    - A bar plot of stability regions is also included.
-    - A tendency plot highlights the best correspondence point that produces the highest agreement thresholds between the pipelines. 
-
-- Clustering plots:
-    - For each pipeline, clustering plots are displayed for the selected threshold(s) (--plots-threshold).
-    - Results can be split by one or more categories (--column-plots).
-    - The pie chart plots include one or multiple segmentes, where each segment represents the frequency of samples within a given category.
-
-- Outbreak plots:
-    - Evaluates cluster composition for a given threshold (--threshold_outbreak) and pipeline, illustrated in a heatmap.
-
-Other important file:
-- All_correspondence.tsv: It allows identification of corresponding thresholds between the methods used in each pipeline.
+**Source files**   
+Besides the HTML report, this tool provides a wide variety of source files that are generated throughout the analysis. Examples of these files are:
+- _All_correspondence.tsv_: It reports the inter-pipeline corresponding thresholds between two pipelines
   
 ## Description of the main modules of EvalTree
 
   ## Characterization
-  - Requires partitions.tsv file generated by ReporTree software. 
   - The number of existing partitions is calculated for each allelic distance threshold, reflecting how the samples are grouped at a given threshold.
     
   ## Clustering visualisation
@@ -120,31 +90,24 @@ Other important file:
   - If the user wants to re-analyse the threshold outbreak with other values, they can use the repeat threshold outbreaks option (-rto) to repeat just this analysis, returning a new HTML report.
 
 
-### Installation with conda
+## Installation with conda
 
 ```bash
-
-git clone https://github.com/jg-pereira/CENTAUR/EvalTree.git
-cd CENTAUR/EvalTree
+git clone https://github.com/jg-pereira/CENTAUR.git
+cd CENTAUR/EvalTree/
 mkdir scripts
 cd scripts
-```
-Warning: Make sure you are inside the EvalTree/scripts directory before cloning insapathogenomics/WGS_cluster_congruence and insapathogenomics/ComparingPartitions.
-
-```bash
 git clone https://github.com/insapathogenomics/WGS_cluster_congruence
 git clone https://github.com/insapathogenomics/ComparingPartitions
 ```
 
-Warning: Make sure you are inside the EvalTree directory.
+To create the conda environment:
 ```bash
 cd ..
-
 conda env create --name EvalTree --file=EvalTree_env.yml
 ```
 
 Run pytest to check that your installation was successful in the EvalTree directory:
-
 ```bash
 pytest
 ```
@@ -155,6 +118,7 @@ python EvalTree.py -h
 ```
 
 ### Dependencies:
+
 ## Usage
 
   ```bash
@@ -222,22 +186,22 @@ Outbreak
 
 ### A simple EvalTree command line example using two input ReporTree folders 
 ```bash
-EvalTree.py -i1 input1 -i2 input2 -o output -ps partitions_summary -pt MST-7x1.0 -cp name_column -to "MST-7x1.0,MST-7x1.0;<=MST-7x1.0,MST-9x1.0"
+python EvalTree.py -i1 input1 -i2 input2 -o output -ps partitions_summary -pt MST-7x1.0 -cp name_column -to "MST-7x1.0,MST-7x1.0;<=MST-7x1.0,MST-9x1.0"
 ```
 ### A simple EvalTree command line example using two files 
 ```bash
-EvalTree.py -i1 X_partitions.tsv -i2 Y_partitions.tsv -o output
+python EvalTree.py -i1 X_partitions.tsv -i2 Y_partitions.tsv -o output
 ```
   
 ## Citation
 
 If you run EvalTree, please cite the publication:
 
-Mixão, V., Pinto, M., Brendebach, H., Sobral, D., Santos, J. D., Radomski, N., Uldall, A. S. M., Bomba, A., Pietsch, M., Bucciacchio, A., de Ruvo, A., Castelli, P., Iwan, E., Simon, S., Coipan, C. E., Linde, J., Petrovska, L., Kaas, R. S., Joensen, K. G., Nielsen, S. H., Kiil, K., Lagesen, K., Di Pasquale, A., Gomes, J. P., Deneke, C., Tausch, S. H., & Borges, V. (2025). Multi-country and intersectoral assessment of cluster congruence between pipelines for genomics surveillance of foodborne pathogens. Nature Communications, 16, Article 3961. https://doi.org/10.1038/s41467-025-59246-8
+[Mixão V et al. (2025). Multi-country and intersectoral assessment of cluster congruence between pipelines for genomics surveillance of foodborne pathogens. Nature Communications, 16, Article 3961. https://doi.org/10.1038/s41467-025-59246-8](https://doi.org/10.1038/s41467-025-59246-8)
 
-EvalTree relies on the work of other developers. So you must cite:
-
-1) ComparingPartitions: https://journals.asm.org/doi/10.1128/jcm.02536-05?permanently=true 
+EvalTree relies on the work of other developers. So you must also cite:
+- ReporTree: https://genomemedicine.biomedcentral.com/articles/10.1186/s13073-023-01196-1
+- ComparingPartitions: https://journals.asm.org/doi/10.1128/jcm.02536-05?permanently=true 
 
 
 ## Funding
