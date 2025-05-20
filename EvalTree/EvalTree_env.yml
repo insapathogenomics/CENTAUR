@@ -255,4 +255,4 @@ dependencies:
   - zipp=3.17.0=py38h06a4308_0
   - zlib=1.2.13=h4ab18f5_6
   - zstd=1.5.5=hc292b87_2
-prefix: /home/jgomes/miniconda3/envs/project
+
