@@ -29,7 +29,7 @@ _Note: if a previous cgMLST schema or a multi-sequence alignment are available, 
 - TSV file with information for each grouping variable (cluster) of the selected representative isolate(s)
 - TSV file with assembly metrics including additional columns informing if a sample was selected as representative and if it belongs to a cluster/group that is represented in the final dataset.
 
-You can find more details about the usage of this tool in the respective page.
+You can find more details about the usage of this tool in [DownTree's page](https://github.com/vmixao/CENTAUR/blob/main/DownTree/README.md).
 
 ## _PanTree_
 _PanTree.py_ was designed to evaluate loci prevalence and allele diversity, and map their presence/absence in the “species” tree topology, providing evidence for an informed decision on the inclusion of accessory loci during the creation of a novel wgMLST schema.
@@ -47,7 +47,7 @@ _Note: if a previous cgMLST schema or a multi-sequence alignment are available, 
 #### Output
 - TSV file with information about the prevalence of each cg/wgMLST loci in the dataset, their allelic diversity and distribution across clusters identified at level X
 
-You can find more details about the usage of this tool in the respective page.
+You can find more details about the usage of this tool in [PanTree's page](https://github.com/vmixao/CENTAUR/blob/main/PanTree/README.md).
 
 ## _EvalTree_
 _EvalTree.py_ was designed to automate a [[previously developed methodology](https://github.com/insapathogenomics](https://github.com/insapathogenomics/WGS_cluster_congruence)) for evaluation of congruence between two clustering analysis ([Mixão et al. 2025](https://www.nature.com/articles/s41467-025-59246-8)).
@@ -66,7 +66,7 @@ For each pipeline/typing system under comparison, one of the following:
 #### Output
 - HTML report of the congruence between cluster composition at all possible resolution levels between two typing solutions, and their performance in identifying similar outbreak signals
 
-You can find more details about the usage of this tool in the respective page.
+You can find more details about the usage of this tool in [EvalTree's page](https://github.com/vmixao/CENTAUR/blob/main/EvalTree/README.md).
 
 ## _ReporTree_
 
@@ -77,7 +77,7 @@ _ReporTree_ is a flexible pipeline that facilitates the [detection of genetic cl
 - Determine genetic clusters at all possible threshold levels using a cg/wgMLST or a SNP-based approach
 - Perform a dynamic zoom-in analysis of an outbreak cluster, extending the static cgMLST with accessory loci that are present in this cluster
 
-**NOTE: ReporTree outputs can be used as input for any of the above-mentioned tools (DownTree.py, PanTree.py and EvalTree.py)!!**
+**NOTE: [ReporTree](https://github.com/insapathogenomics/ReporTree) outputs can be used as input for any of the above-mentioned tools (DownTree.py, PanTree.py and EvalTree.py)!!**
   
 You can find more details about the usage of this tool in [ReporTree's page](https://github.com/insapathogenomics/ReporTree).
 
