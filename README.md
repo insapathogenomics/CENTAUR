@@ -70,7 +70,7 @@ You can find more details about the usage of this tool in [EvalTree's page](http
 
 ## _ReporTree_
 
-_ReporTree_ is a flexible pipeline that facilitates the [detection of genetic clusters and their linkage to epidemiological data](https://genomemedicine.biomedcentral.com/articles/10.1186/s13073-023-01196-1) 
+_ReporTree_ is a flexible pipeline that facilitates the [detection of genetic clusters and their linkage to epidemiological data (Mixão et al. 2023)](https://genomemedicine.biomedcentral.com/articles/10.1186/s13073-023-01196-1).
 
 #### Possible applications
 - Monitoring genetic clusters and perform their characterization in routine surveillance
