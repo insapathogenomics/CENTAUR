@@ -23,7 +23,7 @@ _Note: if a previous cgMLST schema or a multi-sequence alignment are available, 
 ```
 git clone https://github.com/vmixao/CENTAUR.git
 cd CENTAUR/PanTree/
-conda env create --name reportree --file=pantree.yml
+conda env create --name pantree --file=pantree.yml
 python PanTree.py -h
 ```
 
