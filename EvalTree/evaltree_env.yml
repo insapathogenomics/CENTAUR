@@ -1,4 +1,4 @@
-name: project
+name: EvalTree
 channels:
   - bioconda
   - etetoolkit
