@@ -8,10 +8,10 @@ _DownTree.py_ was designed to select a subset of assemblies from a large and div
 - Selection of the high-quality genome that represents a given outbreak cluster for posterior in-depth SNP-based analysis
 
 ## Input
-- TSV file with clustering information (retrieved from traditional typing, _k_-mer based clustering, etc.) from a large dataset of isolates
+- TSV file with clustering information (e.g. cgMLST clusters at all threshold levels, traditional typing classification, _k_-mer based clustering, etc.) from a large dataset of isolates
 - TSV file with assembly metrics
 
-_Note: if a previous cgMLST schema or a multi-sequence alignment are available, we strongly recomend that you use the partitions.tsv file of [ReporTree](https://github.com/insapathogenomics/ReporTree)_  
+_Note: if a previous cgMLST schema or a multi-sequence alignment are available, we strongly recomend that you use the partitions.tsv file of [ReporTree](https://github.com/insapathogenomics/ReporTree), which provides clustering information at all possible threshold levels for a dataset._  
 
 ## Output
 - TSV file with information for each grouping variable (cluster) of the selected representative isolate(s)
