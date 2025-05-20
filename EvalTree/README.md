@@ -241,4 +241,4 @@ EvalTree relies on the work of other developers. So you must cite:
 
 
 ## Funding
-This work was supported by funding from the xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+This work was supported by the ISIDORe project (funding from the European Union’s Horizon Europe Research & Innovation Programme, Grant Agreement no. 101046133) and by national funds through FCT - Foundation for Science and Technology, I.P., in the frame of Individual CEEC 2022.00851.CEECIND/CP1748/CT0001.
