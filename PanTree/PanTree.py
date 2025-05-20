@@ -17,7 +17,7 @@ import matplotlib.patches as mpatches
 from Bio import Phylo
 
 version = "1.0.0"
-last_updated = "2025-05-19"
+last_updated = "2025-05-20"
 
 def print_log(message, log):
 	""" print messages in the terminal and in the log file """
@@ -209,8 +209,9 @@ def main():
     parser.add_argument("-p", "--partitions", dest="partitions", required=False, help="[MANDATORY] Path to the input partitions table (TSV). We recomend using the partitions table obtained with ReporTree.")
     parser.add_argument("-tree", "--tree", dest="tree", help="[MANDATORY] Path to the phylogenetic tree (NWK). It can be a single-linkage tree obtained with ReporTree.")
     parser.add_argument("-s", "--column2select", dest="column_select", required=True, help="[MANDATORY] Comma-separated list of the thresholds (column names) of the partitions table that will be used to \
-                        flag loci dispersed throughout the tree (e.g. --partitions2select single-1x1.0,single-10x1.0,single-100x1.0).")
-    parser.add_argument("-cp", "--cluster-prevalence", dest="cluster_prevalence", required=True, help="[MANDATORY] ")
+                        flag loci dispersed throughout the tree (e.g. --column2select single-1x1.0,single-10x1.0,single-100x1.0).")
+    parser.add_argument("-cp", "--cluster-prevalence", dest="cluster_prevalence", required=True, help="[MANDATORY] Percentage of clusters/groups were a given locus is present, so it \
+                        can be considered as elegible for the wgMLST.")
     parser.add_argument("-o", "--output", dest="output", required=True, help="[MANDATORY] Tag for output files.")
     parser.add_argument("--order", dest="order", choices=["yes", "no"], default="no", help="Order loci by the percentage of presence - descending [default: no].")
     parser.add_argument("--threshold", dest="thr", default="", help="Only analyze loci with a prevalence lower than this threshold (value between 0 and 1).")
