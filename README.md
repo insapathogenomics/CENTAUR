@@ -1,6 +1,6 @@
 # CENTAUR
 
-This repository contains a novel set of tools (currently under development in the frame of CENTAUR project) that address key bioinformatics challenges faced throughout the life-cycle of a cg/wgMLST pipeline. Each of these tools will have soon their own GitHub page. Stay tuned!
+This repository contains a novel set of tools (currently under development in the frame of CENTAUR project, supported by the European ISIDORe initiative) that address key bioinformatics challenges faced throughout the life-cycle of a cg/wgMLST pipeline. Each of these tools will have soon their own GitHub page. Stay tuned!
 
 ## Motivation
 Routine genomics-based surveillance of bacterial pathogens is increasingly relying on cg/wgMLST approaches. Currently, there is a need for bioinformatics solutions that facilitate the development, deployment and application of new cg/wgMLST workflows, while ensuring their long-term sustainability and inter-laboratory comparability in the Era of global surveillance. In this repository, we present a **novel set of tools that address key bioinformatics challenges faced throughout the life-cycle of a cg/wgMLST pipeline**, illustrating their added-values across the different stages of a **brand-new implementation of routine genomics surveillance for a bacterial pathogen X**.
@@ -9,7 +9,7 @@ Routine genomics-based surveillance of bacterial pathogens is increasingly relyi
   <img src="https://github.com/user-attachments/assets/693c9fa2-8ed0-4bf8-b273-d65cefcadfd3" alt="pipeline_life_cycle" />
 </p>
 
-This toolkit is composed of independent tools, which usage can be potentiated if combined:
+This toolkit is composed of independent tools, whose usage can be potentiated if combined:
 
 ## _DownTree_
 _DownTree.py_ was designed to select a subset of assemblies from a large and diverse dataset that is still representative of the global dataset diversity. For this, _DownTree.py_ takes into consideration information about previously determined cgMLST clusters (or any other grouping variable of interest) and the assemblies' metrics.
@@ -20,10 +20,10 @@ _DownTree.py_ was designed to select a subset of assemblies from a large and div
 - Selection of the high-quality genome that represents a given outbreak cluster for posterior in-depth SNP-based analysis
 
 #### Input
-- TSV file with clustering information (retrieved from traditional typing, _k_-mer based clustering, etc.) from a large dataset of isolates
+- TSV file with clustering information (e.g. cgMLST clusters at all threshold levels, traditional typing classification, _k_-mer based clustering, etc.) from a large dataset of isolates
 - TSV file with assembly metrics
 
-_Note: if a previous cgMLST schema or a multi-sequence alignment are available, we strongly recomend that you use the partitions.tsv file of [ReporTree](https://github.com/insapathogenomics/ReporTree)_  
+_Note: if a previous cgMLST schema or a multi-sequence alignment are available, we strongly recomend that you use the partitions.tsv file of [ReporTree](https://github.com/insapathogenomics/ReporTree), which provides clustering information at all possible threshold levels for a dataset._  
 
 #### Output
 - TSV file with information for each grouping variable (cluster) of the selected representative isolate(s)
