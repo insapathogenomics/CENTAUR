@@ -230,7 +230,7 @@ def check_folder(input_path):
             prefix_list.append(prefix_st)
             file_prefix_map[file] = prefix_st
   
-    unique_prefixes = set(prefix_list)    #{'input1/GT'} not dicionary
+    unique_prefixes = set(prefix_list)    
     list_prefixes = [os.path.basename(p) for p in unique_prefixes]
 
     if len(unique_prefixes) > 1:
@@ -298,9 +298,9 @@ def check_threshold(threshold):
     #print(f'\n---------------------------------------------- Function: check_threshold ----------------------------------------------\n')
 
     if threshold != 'max':
-        parts = threshold.split('-')  #['2','8']
+        parts = threshold.split('-')  
 
-        if len(parts) != 2 or not all(part.isdigit() for part in parts):  #['2','p']  ['p', 'm']
+        if len(parts) != 2 or not all(part.isdigit() for part in parts):  
             sys.exit(f"\tError: The threshold argument (-t) must be in the format 'X-Y', where X and Y are positive integers.")
 
     return threshold
@@ -370,7 +370,7 @@ def check_file(file):
     if nr_columns == 2:
         n_groups = len(df.iloc[:,1].unique())
         prefix = prefix_file.split('.tsv')[0]
-        file_type = False # Sequence-type matrix
+        file_type = False 
            
     elif nr_columns > 2:
 
@@ -581,13 +581,13 @@ def check_range_threshold(partition_matrix, threshold, log):
 
     if threshold != 'max':
         parts = threshold.split('-')
-        start_threshold = int(parts[0])  #2
-        end_threshold = int(parts[1])    #8
+        start_threshold = int(parts[0])  
+        end_threshold = int(parts[1])    
         
         df = pd.read_table(partition_matrix) 
         columns_df = len(df.columns)
-        column_range = (0, columns_df) #0-102
-        min_column,max_column=column_range  #0-min ; 102 -max
+        column_range = (0, columns_df) 
+        min_column,max_column=column_range  
 
         if start_threshold > end_threshold:
             sys.exit(f"\tError: Start threshold {start_threshold} is greater than end threshold {end_threshold}.")
@@ -648,7 +648,7 @@ def management_main_scripts( comparing_partitions_script, get_best_part_correspo
     
     print_log(f'\tObtaining the cluster congruence score ...', log)
     
-    #1- Running the first script with the user's inputs  #input1 e 2 são as matrizes de partição
+    #1- Running the first script with the user's inputs 
      
     print_log(f"\t\tRunning comparing_partitions_v2.py in “between_methods” mode.", log)
 
@@ -749,7 +749,7 @@ def filter_partition_matrix(partition_matrix, prefix_single, start_threshold, en
     Parameters
     ----------
     partition_matrix: str
-        Relative path to the partition matrix with containing all thresholds.
+        Relative path to the partition matrix.
     prefix_single: str 
         Prefix to be used in the name of the filtered partition matrix file.
     output: str
@@ -872,14 +872,14 @@ def get_heatmap(output, i1_prefix, i2_prefix, threshold, log):
                             coloraxis = dict(colorscale = 'Blues', cmin = 0, cmax = 3))
     
     #--------------------------------------------------------------------------
-    # For both sequence type matrix:
+    # For both other matrices:
     if n_column == 1:
         fig_heatmap.update_layout(xaxis = dict(tickmode = 'array', tickvals = [0], ticktext = [0]))
     if n_lines == 1:
         fig_heatmap.update_layout(yaxis = dict(tickmode = 'array', tickvals = [0], ticktext = [0]))
         
     #--------------------------------------------------------------------------
-    #For partition filtered matrix:
+    #For the partitions filtered matrix:
 
     if threshold != 'max':
 
@@ -890,8 +890,7 @@ def get_heatmap(output, i1_prefix, i2_prefix, threshold, log):
             columns_y = df.iloc[:, 0]
             string_columns_y = [s.split('-')[1].split('x')[0] for s in columns_y]
             len_y = len(columns_y)
-            print(len_y)
-
+           
             if len_y <= max_ticks:
                 index_y = list(range(len_y))
                 fig_heatmap.update_layout(xaxis = dict(tickmode ='array', tickvals = [0], ticktext = [0]))
@@ -938,8 +937,8 @@ def get_tendency(output, prefix_both, log):
     Creates a scatter plot with trendline from *_All_correspondence.tsv,
     showing the best correspondence points between methods in each pipeline.
     
-    Parameter
-    ---------
+    Parameters
+    ----------
     output: str
         Path to the directory where the *_All_correspondence.tsv file is located and where the figure will be saved.
 
@@ -966,7 +965,7 @@ def get_tendency(output, prefix_both, log):
 def join_inputs_variables(data_folder, data_files):
 
     """
-    Join the inputs varibles provided in the command line for the congruence analyis.
+    Join the input variables provided in the command line for the congruence analysis.
 
     Parameters
     ----------
@@ -1005,7 +1004,7 @@ def join_inputs_variables(data_folder, data_files):
             sys.exit("\tError: It is impossible to proceed the analysis")
         else:
             print(f'\nChecking the command line:')
-            print(f'\tThe provided arguments are all compatible. Everything is ready to run ToolBox.py :)\n')
+            print(f'\tThe provided arguments are all compatible. Everything is ready to run EvalTree.py :)\n')
 
     return inputs_variables
 
@@ -1020,7 +1019,7 @@ def load_and_prepare_data(file, log):
 
     Parameters
     ----------
-    file : str
+    file: str
         Path to the file that will be processed.
 
     Returns
@@ -1107,9 +1106,9 @@ def check_threshold_in_file(method, df_filtered, clustering_file, log):
     method: list
         A list of thresholds in the format 'MST-{value}x1.0'.
     df_filtered: pandas.DataFrame
-        Dataframe containing data of the selected file.
+        A dataframe containing data from the selected file.
     clustering_file: str
-        Path to the file (partitions_summary or sample_of_interes)
+        Path to the file (partitions_summary or sample_of_interest)
 
     Return
     ------
@@ -1134,7 +1133,7 @@ def check_threshold_in_file(method, df_filtered, clustering_file, log):
 def filter_df_by_plot_threshold(filtered_threshold, df_filtered, n_cluster, log):
 
     """
-    Check if the number of cluster selected by the n_cluster argument can be applied to the dataframe.
+    Check if the number of clusters selected by the n_cluster argument can be applied to the dataframe.
     Filter the dataframe according to the threshold plots and limit the number of clusters per threshold.
     
     Parameters
@@ -1143,7 +1142,7 @@ def filter_df_by_plot_threshold(filtered_threshold, df_filtered, n_cluster, log)
         List of valid thresholds to be applied to df_filtered to generate cluster plots.
     
     df_filtered: pandas.DataFrame
-        Dataframe organized with the largest clusters.
+        The dataframe is organized with the largest clusters.
 
     n_cluster: int
         The number of clusters (pie plot(s)) to be produced.
@@ -1189,12 +1188,12 @@ def filtering_df_threshold(filtered_threshold, df_filtered, log):
     filtered_threshold : list
         List of valid thresholds to be applied to df_filtered.
 
-    df_filtered : pandas.DataFrame
+    df_filtered: pandas.DataFrame
         DataFrame containing the clustering information, where the first column represents thresholds.
 
     Returns
     -------
-    df_filtered_threshold : pandas.DataFrame
+    df_filtered_threshold: pandas.DataFrame
         DataFrame filtered by the thresholds in filtered_threshold.
     """
     #print_log(f'\n---------------------------------------------- Function: filtering_df_threshold ----------------------------------------------\n', log)
@@ -1303,7 +1302,7 @@ def check_structure_lines_column_plots(check_columns, result_df, plots_category_
             n_cluster_length = row['cluster_length']
 
             #-------------------------------
-            #Check if line it is valid 
+            #Check if the line is valid 
 
             if re.match(pattern_line_column_plot, str(row[col])):  
                 
@@ -1372,12 +1371,12 @@ def check_structure_lines_column_plots(check_columns, result_df, plots_category_
                         list_values = values
 
                 #------------------------------------------
-                # Defenition of colors foe each category
+                # Definition of colors for each category
                 colors = []
                
                 for cat in list_category:
                     if cat not in category_colors:
-                        category_colors[cat] = generate_pastel_color()  #add the cat key and value generate_pastel_color
+                        category_colors[cat] = generate_pastel_color()  
                     colors.append(category_colors[cat])
                     
                 #-----------------------------------------
@@ -1390,7 +1389,7 @@ def check_structure_lines_column_plots(check_columns, result_df, plots_category_
                 fig.update_layout(title_x = 0.5, annotations = [dict(
                                             x = 0.5,
                                             y = -0.2,
-                                            text = f'Number of samples: {n_cluster_length}<br>{sample_increase}',showarrow=False)])  #evita que apareça a seta 
+                                            text = f'Number of samples: {n_cluster_length}<br>{sample_increase}',showarrow=False)])  
                 
                 fig.write_image(f'{output}/{prefix}_{mst}_{col}_{cluster_rename}.png', format="png")              
                 result_dict = {'A': mst, 'B': col, 'C': fig}    
@@ -1432,7 +1431,7 @@ def select_nomenclature_change(df_filtered_threshold, log):
     possibilities = ['kept (increase)','new','new (increase)', 'new (merge_increase)', 'new (split_increase)', 'new (split_merge_increase)']
     
     if 'nomenclature_change' in df_filtered_threshold.columns:
-        data = df_filtered_threshold['nomenclature_change'].values.tolist()  #give me a list with the values presents in the column above 
+        data = df_filtered_threshold['nomenclature_change'].values.tolist()   
         unique_list = set(data)
         
         for elem in unique_list:
@@ -1486,7 +1485,7 @@ def get_file_partition_by_threshold (partition_matrix, prefix, output, log):
     ---------
     partition_matrix: str
         Path to the *_partitions.tsv file.
-    Prefix: str
+    prefix: str
         Prefix to include in the output filename.
     output: str 
         Path to the directory where the results will be saved.
@@ -1563,14 +1562,14 @@ def concatenation_files(file1, file2, output, prefix_both):
         Path to the first TSV file.
     file2 : str
         Path to the second TSV file.
-    output : str
-        Directory where the combined file will be saved.
+    output: str
+        The directory where the combined file will be saved.
     prefix_both : str
         Prefix for naming the output file.
 
     Returns
     -------
-    path : str
+    path: str
         Full path to the saved concatenated file.
     """
     #print(f'\n---------------------------------------------- Function: concatenation_files----------------------------------------------\n')
@@ -1604,7 +1603,7 @@ def organize_clusters(results_list):
     Returns
     -------
     mst_groups : dict
-        Dictionary organized by threshold and then by category.
+        The dictionary is organized by threshold and then by category.
     """
     #print(f'\n---------------------------------------------- Function: organize_clusters----------------------------------------------\n')
     
@@ -1675,7 +1674,7 @@ def processing_data(file, log):
     final_data: list of int
         List of integers identifying the end of each stability block.
 
-    values_block : list of int
+    values_block: list of int
         Combined and sorted list of all start and end points.
     """
     #print_log(f'\n---------------------------------------------- Function: processing_data----------------------------------------------\n', log)
@@ -1704,17 +1703,17 @@ def processing_data(file, log):
 def change_processing_data(final_df, i1_prefix, i2_prefix, output, log):
 
     """
-    Convertion of dataframe values in logartimics to create the graph.
+    Conversion of dataframe values in logarithms to create the graph.
 
     Parameters
     ----------
-    final_df: <class 'pandas.core.frame.DataFrame'>
+    final_df: pd.DataFrame
         Dataframe with the start and end of each block per pipeline
 
-    i1_prefix: <class 'str'>
+    i1_prefix: str
         Prefix added to the result in pipeline i1
 
-    i2_prefix: <class 'str'>
+    i2_prefix: str
         Prefix added to the result in pipeline i2
     """
 
@@ -1772,7 +1771,7 @@ def validate_combinations_outbreak(threshold_outbreak):
     - "equal" (defined by ',')
     - "lower_equal" (defined by '<=')
 
-    Multiple combinations must be separated by semicolons (';'), witout spaces.
+    Multiple combinations must be separated by semicolons (';'), without spaces.
 
     This function processes one or more threshold pairs, extracting threshold_1, threshold_2, and  the comparison type.
 
@@ -1994,8 +1993,8 @@ def creation_overlap_clusters(process_files, output, values_oubreak):
 
         df=pd.read_table(file) 
         df_filtered = df.drop(df.columns[0], axis=1)
-        values_col1 = df_filtered.columns[0]  #HC
-        values_col2 = df_filtered.columns[1]   #GT
+        values_col1 = df_filtered.columns[0]  
+        values_col2 = df_filtered.columns[1]  
 
         df_percentage= df_filtered*100
         name_file=os.path.basename(file)
@@ -2044,8 +2043,6 @@ def get_plot_columns(file):
     ----------
     file: str
         Path to the *_partitions_summary.tsv or *_SAMPLE_OF_INTEREST_partitions_summary.tsv file.
-    list_column_plot: str
-        Type of file that the user wants to vizualize the columns names. 
 
     Return
     ------
@@ -2172,7 +2169,7 @@ def transfer_info_to_html_content(path_temp, html_content, log):
         #print_log(path_temp, log)
         with open(path_temp, 'r') as input_file:
             content = input_file.read()
-            #print_log(content,log)
+           
     else:
         print_log('There was a problem with the creation of the file containing information about clustering and congruence for the second HTML report.', log)
     html_content = content
@@ -2188,18 +2185,19 @@ def reading_sequence_type(sequence_type_file, output, prefix_st, log):
 
     Parameters
     ----------
-    sequence_type: <class 'str'>
+    sequence_type: str
         Full path to the sequence type matrix.
 
     output: str
         Path to the directory where the results will be saved.
 
-    prefix_st: <class 'str'>
-    
+    prefix_st: str
+    	The prefix that will be added to the file.
+     
     Returns
     -------
-    fig: <class 'plotly.graph_objs._figure.Figure'>
-        Code to produce
+    fig: plotly.graph_objs._figure.Figure
+        Code to produce figure
     """
 
     #print_log(f'\n---------------------------------------------- Function: reading_sequence_type----------------------------------------------\n', log)
@@ -2232,16 +2230,17 @@ def create_html(log, file_path_report):
 
     """
     Opening HTML file to save the dynamic graphs of the various analyses.
+    
     Parameters
     ----------
     log: <class '_io.TextIOWrapper'>
 
-    file_path_report: <class 'str'>
+    file_path_report: str
         Full path to the HTML file with all analysis results.
 
     Return
     ------
-    html_content: <class 'str'>
+    html_content: str
         It contains the body of an HTML document.
 
     """
@@ -2269,8 +2268,8 @@ def create_html(log, file_path_report):
             width: 100%;
         }}
         
-        /* ------------------------- imagens  CLUSTERING------------------------------------------- */
-        .image-row {{  /* para por em linha */
+        /* ------------------------- CLUSTERING images------------------------------------------- */
+        .image-row {{  
             display: flex;
             flex-wrap: wrap;
             justify-content: space-around;
@@ -2281,7 +2280,7 @@ def create_html(log, file_path_report):
             flex: 1 1 calc(25% - 20px); 
             box-sizing: border-box;
             margin: 10px;
-            max-width: calc(25% - 20px); /* força todas a mesma largura */                
+            max-width: calc(25% - 20px);                 
         }}
 
         /* --------------------------- START Accordion ------------------------------------------- */
@@ -2296,7 +2295,7 @@ def create_html(log, file_path_report):
             outline: none; 
             font-size: 20px;
             transition: 0.4s;
-            font-weight: bold; /* Adiciona negrito */
+            font-weight: bold; 
         }}
         .active, .accordion:hover {{background-color: #ccc;}}
 
@@ -2307,14 +2306,12 @@ def create_html(log, file_path_report):
 
         /* --------------------------- END Accordion ------------------------------------------- */
 
-        /* --------------------------- START heatmap ------------------------------------------- */
         .image-heatmap {{
             display: flex;
             justify-content: space-around;
             margin-top: 20px;
             flex-wrap: wrap;
         }}
-        /* --------------------------- END heatmap ------------------------------------------- */
 
     </style>
 </head>
@@ -2373,13 +2370,12 @@ def get_clusters(mst_groups, prefix):
 
     """
     Display pie charts by threshold and category, generating CLUSTER HTML content for each pipeline.
-    Get clusters() use the data processed from def process_df_to_plots() AND def organize_clusters(),that are explained above.
-
+    
     Parameters
     ----------
 
-    mst_groups:
-
+    mst_groups: dict
+	Categories and images.
     prefix: str
         Prefix the name of the file that is being processed.
 
@@ -2531,23 +2527,22 @@ def javascript_function():
 def write_html(html_content, file_path_report, log):
     
     """
-    Start of writing
+    Writing HTML
 
     Parameters
     ----------
-    html_content: class 'str'
-        Code of html report
+    html_content: str
+        Code of HTML report.
 
-    file_path_report: class 'str'
-        Path of the report  html file
+    file_path_report: str
+        Path of the report  HTML file.
     Return
     -----
-    file_path_report: class 'str'
-        HTML file with results
+    file_path_report: str
+        HTML file with results.
     """
     #print(f'\n---------------------------------------------- Function: write_html----------------------------------------------\n')
 
-    #Save the content in a HTML file
     with open(file_path_report, "w") as file:
         file.write(html_content)
     print_log(f"\nReport successfully generated in:\n {file_path_report}.\n", log)     
@@ -2899,10 +2894,10 @@ def main():
     # -------------------------------------------------------------------------------------------------------------------------
     # INITIAL INFORMATIONS
 
-    print("---------------------------------------------- Running ToolBox.py ----------------------------------------------\n")
+    print("---------------------------------------------- Running EvalTree.py ----------------------------------------------\n")
     print_log(f"Version " + str(version) + " last updated on " + str(last_updated)+"\n", log)
     command_line = " ".join(sys.argv)
-    print_log(f"Running ToolBox with the following command: {command_line}\n", log)
+    print_log(f"Running EvalTree with the following command: {command_line}\n", log)
     print_log(f'Log file name: {log_name}\n', log)
     start = datetime.datetime.now()
     print_log("Start: " + str(start)+"\n", log)
@@ -3112,7 +3107,7 @@ def main():
                 try:
                     name_block = processing_block_names(file, prefix, log)
                     first_data, final_data, values_block = processing_data(file, log)
-                    #list_values_block.append(values_block)
+                    list_values_block.append(values_block)
                     
                     df = pd.DataFrame({'Block_id': name_block, 'Start': first_data, 'Finish': final_data, 'Pipeline': prefix})
                     all_dfs.append(df)
