@@ -19,7 +19,7 @@ def test_arguments():
     
     main_path=os.path.dirname(__file__)  
     path=os.path.dirname(main_path)
-    script_path = os.path.join(path,"evaltree.py")
+    script_path = os.path.join(path,"EvalTree.py")
     input1=os.path.join(main_path,'input1')  
     input2=os.path.join(main_path,'input2')
     output=os.path.join(main_path,'TEST2')
@@ -147,8 +147,7 @@ def test_arguments():
     assert num_columns==3
 
                                                 #Pipeline GT_vs_HC
-    print('------------------------------------------------------------------------')
-    print(output)
+
     GT_vs_HC_final_score=pd.read_csv(os.path.join(output,"GT_vs_HC_final_score.tsv"), sep='\t', header=None)
     assert GT_vs_HC_final_score.iloc[4,5]=='3.0'
     num_lines, num_columns=GT_vs_HC_final_score.shape
@@ -261,7 +260,7 @@ def test_RTO_argument():
 
     main_path=os.path.dirname(__file__) 
     path=os.path.dirname(main_path)
-    script_path = os.path.join(path,"evaltree.py")
+    script_path = os.path.join(path,"EvalTree.py")
     input1=os.path.join(main_path,'input1')  
     input2=os.path.join(main_path,'input2')
     output=os.path.join(main_path,'TEST2')
@@ -303,7 +302,7 @@ def test_plots_category_percentage():
 
     main_path = os.path.dirname(__file__)  
     path = os.path.dirname(main_path)  
-    script_path = os.path.join(path, "evaltree.py")
+    script_path = os.path.join(path, "EvalTree.py")
     input1 = os.path.join(main_path, 'input1')
     input2 = os.path.join(main_path, 'input2')
     output = os.path.join(main_path, 'TEST2', 'plots_category_percentage')
@@ -342,7 +341,7 @@ def test_sequence_type_and_folder():
     
     main_path = os.path.dirname(__file__)  
     path = os.path.dirname(main_path)  
-    script_path = os.path.join(path, "evaltree.py")
+    script_path = os.path.join(path, "EvalTree.py")
     input1 = os.path.join(main_path, 'input1','GT_1.tsv')
     input2 = os.path.join(main_path, 'input2')
     output = os.path.join(main_path, 'TEST2', 'st_vs_folder')
@@ -373,7 +372,7 @@ def mx_partition_vs_mx_partitions():
 
     main_path = os.path.dirname(__file__)  
     path = os.path.dirname(main_path)  
-    script_path = os.path.join(path, "evaltree.py")
+    script_path = os.path.join(path, "EvalTree.py")
     input1 = os.path.join(main_path,'input1' ,'GT_partitions.tsv')
     input2 = os.path.join(main_path, 'input2' ,'HC_partitions.tsv')
     output = os.path.join(main_path, 'TEST2', 'mx_vs_mx')
@@ -404,7 +403,7 @@ def test_plots_category_number():
 
     main_path = os.path.dirname(__file__)  
     path = os.path.dirname(main_path)  
-    script_path = os.path.join(path, "evaltree.py")
+    script_path = os.path.join(path, "EvalTree.py")
     input1 = os.path.join(main_path, 'input1')
     input2 = os.path.join(main_path, 'input2')
     output = os.path.join(main_path, 'TEST2', 'plots_category_number')
@@ -439,7 +438,7 @@ def test_folder_vs_folder():
 
     main_path = os.path.dirname(__file__)  
     path = os.path.dirname(main_path)  
-    script_path = os.path.join(path, "evaltree.py")
+    script_path = os.path.join(path, "EvalTree.py")
     input1 = os.path.join(main_path, 'input1')
     input2 = os.path.join(main_path, 'input2')
     output = os.path.join(main_path, 'TEST2', 'folder_vs_folder')
@@ -460,7 +459,7 @@ def test_file_vs_folder():
 
     main_path = os.path.dirname(__file__)  
     path = os.path.dirname(main_path)  
-    script_path = os.path.join(path, "evaltree.py")
+    script_path = os.path.join(path, "EvalTree.py")
     input1 = os.path.join(main_path, 'input1')
     input2 = os.path.join(main_path, 'input2','HC_2.tsv')
     output = os.path.join(main_path, 'TEST2', 'file_vs_folder')
@@ -478,7 +477,7 @@ def test_file_vs_file():
 
     main_path = os.path.dirname(__file__)  
     path = os.path.dirname(main_path)  
-    script_path = os.path.join(path, "evaltree.py")
+    script_path = os.path.join(path, "EvalTree.py")
     input1 = os.path.join(main_path, 'input1','GT_1.tsv')
     input2 = os.path.join(main_path, 'input2','HC_2.tsv')
     output = os.path.join(main_path, 'TEST2', 'file1_vs_file2')
@@ -496,7 +495,7 @@ def test_file_mx_partition():
 
     main_path = os.path.dirname(__file__)  
     path = os.path.dirname(main_path)  
-    script_path = os.path.join(path, "evaltree.py")
+    script_path = os.path.join(path, "EvalTree.py")
     input1 = os.path.join(main_path, 'input1','GT_1.tsv')
     input2 = os.path.join(main_path, 'input2','HC_partitions.tsv')
     output = os.path.join(main_path, 'TEST2', 'file_vs_file')
