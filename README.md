@@ -1,4 +1,4 @@
-# CENTAUR
+# ACDTree
 
 This repository contains a novel set of tools (currently under development in the frame of CENTAUR project, supported by the European ISIDORe initiative) that address key bioinformatics challenges faced throughout the life-cycle of a cg/wgMLST pipeline. Each of these tools will have soon their own GitHub page. Stay tuned!
 
