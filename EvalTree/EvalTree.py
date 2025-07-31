@@ -6,8 +6,8 @@ By Joana Gomes Pereira
 @INSA
 
 """
-version = "0.1.4"
-last_updated = "2025-07-30"
+version = "1.0.0"
+last_updated = "2025-07-31"
 
 import datetime
 import argparse
@@ -2909,7 +2909,7 @@ def main():
     
     parser.add_argument('-v', '--version',
             action='version',
-            version='EvalTree 0.1.4, last update 2025-07-30', 
+            version='EvalTree 1.0.0, last update 2025-07-31', 
             help='[OPTIONAL] Specify the version number of EvalTree.')
     
     parser.add_argument('-n_stab', '--n_stability',
