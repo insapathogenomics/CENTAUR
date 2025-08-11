@@ -6,8 +6,8 @@ By Joana Gomes Pereira
 @INSA
 
 """
-version = "0.1.3"
-last_updated = "2025-07-25"
+version = "1.0.0"
+last_updated = "2025-07-31"
 
 import datetime
 import argparse
@@ -459,35 +459,66 @@ def check_combinations_arguments(plots_summary_arg, data_folder, data_files):
             input_path = elem[2] 
             stable_regions = elem[6]
 
-
             if type_file == 'sample_of_interest':
-                if '-cp' not in args:
-                    errors.append(f'\tError: For clustering analysis you must specify the column plots (-cp) argument with SAMPLE_OF_INTEREST_partitions_summary file.\n')
+
+                has_cp = '-cp' in args
+                has_pt = '-pt' in args
+                has_pcp = '-pcp' in args
+                has_pcn = '-pcn' in args
+
                 
-                if '-n' in args:
-                    errors.append(f'\tError: It is impossible to use -n argument with SAMPLE_OF_INTEREST_partitions_summary file.\n')
-                
-                if '-pt' not in args:
-                    errors.append(f'\tError: For clustering analyis you must specify the plots threshold (-pt) argument with SAMPLE_OF_INTEREST_partitions_summary file.\n')
+                if not has_cp:
+                    errors.append("\tError: For clustering analysis you must specify the column plots (-cp) argument with SAMPLE_OF_INTEREST_partitions_summary file.\n")
+
+                if not has_pt:
+                    errors.append("\tError: For clustering analysis you must specify the plots threshold (-pt) argument with SAMPLE_OF_INTEREST_partitions_summary file.\n")
 
                 if sample_of_interest is None:
-                    errors.append(f'\tError: The file SAMPLE_OF_INTEREST_partitions_summary does not exist in {input_path}.\n')
+                    errors.append(f"\tError: The file SAMPLE_OF_INTEREST_partitions_summary does not exist in {input_path}.\n")
+
+                if '-n' in args:
+                    errors.append("\tError: It is impossible to use -n argument with SAMPLE_OF_INTEREST_partitions_summary file.\n")
+
+                if has_pcp or has_pcn:
+                    if not has_cp:
+                        errors.append("\tError: Using '-pcp' or '-pcn' requires '-cp' to be specified.\n")
+                    if not has_pt:
+                        errors.append("\tError: Using '-pcp' or '-pcn' requires '-pt' to be specified.\n")
+                    if sample_of_interest is None:
+                        errors.append("\tError: Using '-pcp' or '-pcn' requires the SAMPLE_OF_INTEREST_partitions_summary file to be present.\n")
+
                 go_clustering = True
 
-            if type_file == 'partitions_summary':       
-               
-                if '-cp' in args and '-pt' in args and partitions_summary is not None:
-                    go_clustering = True
+            if type_file == 'partitions_summary':
 
-                else:
-                    if '-cp' in args and not '-pt' in args:
-                        errors.append(f'\tError: For clustering analyis you must specify the plots threshold (-pt) argument.\n')
+                has_cp = '-cp' in args
+                has_pt = '-pt' in args
+                has_custom_clustering = any(opt in args for opt in ['-n', '-pcp', '-pcn'])
 
-                    if '-pt' in args and not '-cp' in args:
-                        errors.append(f'\tError: For clustering analysis you must specify the column plots (-cp) argument.\n')
-
+                if has_custom_clustering:
+                    if not has_cp:
+                        errors.append(f"\tError: Missing argument '-cp'.\n")
+                    if not has_pt:
+                        errors.append(f"\tError: Missing argument '-pt'.\n")
                     if partitions_summary is None:
-                        errors.append(f'\tError: The file partitions_summary does not exist in {input_path}.\n') 
+                        errors.append(f"\tError: Missing partitions_summary file.\n")
+                    go_clustering = len(errors) == 0
+                elif has_cp and has_pt:
+                    if partitions_summary is not None:
+                        go_clustering = True
+                    else:
+                        errors.append(f"\tError: To run clustering with '-cp' and '-pt', you must also provide a valid partitions_summary file.\n")
+                        go_clustering = False
+                elif has_cp and not has_pt:
+                    errors.append(f"\tError: Missing argument '-pt'. Both '-cp' and '-pt' are required to run clustering analysis.\n")
+                    go_clustering = False
+                elif has_pt and not has_cp:
+                    errors.append(f"\tError: Missing argument '-cp'. Both '-cp' and '-pt' are required to run clustering analysis.\n")
+                    go_clustering = False
+                else:
+                   
+                    go_clustering = False
+
             
             if stable_regions is None:
                 if '-n_stab' in args:
@@ -502,8 +533,8 @@ def check_combinations_arguments(plots_summary_arg, data_folder, data_files):
             if '-to' in args and len(data_folder) == 1:
                 errors.append(f'\tError: It is impossible to use the -to argument only with one folder.\n')
                         
-            if '-to' in args and len(data_files) == 1:
-                errors.append(f'\tError: It is impossible to use the -to argument with input files.\n')
+    if '-to' in args and len(data_files) == 1:
+        errors.append(f'\tError: It is impossible to use the -to argument with input files.\n')
 
     if len(data_folder) == 2:
         if '-to' in args:
@@ -514,7 +545,7 @@ def check_combinations_arguments(plots_summary_arg, data_folder, data_files):
     cluster_args = ['-cp', '-pt', '-n', '-ps', '-pcn', '-pcp']
     if data_files:
         if len(data_files) == 2:
-            #cluster_args = ['-cp', '-pt', '-n', '-ps', '-pcn', '-pcp']
+           
             for elem in cluster_args:
                 if elem in args:
                     errors.append(f'\tError: It is impossible to use the {elem} argument when input file(s) are provided.\n')
@@ -523,8 +554,6 @@ def check_combinations_arguments(plots_summary_arg, data_folder, data_files):
             for elem in cluster_args:
                 if elem in args:
                     errors.append(f'\tError: It is impossible to use the {elem} argument when input file(s) are provided.\n')
-
-        
 
     if errors:
         unique_errors = set(errors)
@@ -2206,7 +2235,7 @@ def extration_section_original_file(output, final_files, log):
     original = final_files[1]
     original_file = f'{output}/{original}'
    
-    line = 73
+    line = 71
 
     with open(original_file, "r") as f:
         lines = f.readlines()
@@ -2722,7 +2751,7 @@ def is_folder_empty(folder_path):
     Checks if a folder exists and is empty.
     """
     if os.path.exists(folder_path) and not os.listdir(folder_path):
-        sys.exit(f"The folder '{folder_path}' exists but is empty. Execution will be stopped.") 
+        sys.exit(f"The folder '{folder_path}' exists but is empty.") 
 
 
 #####################################################################################################################################
@@ -2880,7 +2909,7 @@ def main():
     
     parser.add_argument('-v', '--version',
             action='version',
-            version='EvalTree 0.1.3, last update 2025-07-25', 
+            version='EvalTree 1.0.0, last update 2025-07-31', 
             help='[OPTIONAL] Specify the version number of EvalTree.')
     
     parser.add_argument('-n_stab', '--n_stability',
@@ -2923,7 +2952,7 @@ def main():
     if folders !=[]:
 
         for folder in folders:
-            is_folder_empty(folder)   # Check if THE folder is empty. If true, exit. 
+            is_folder_empty(folder)   
 
         for folder in folders:
             print(f"\tFolder: {folder}")
@@ -3033,7 +3062,7 @@ def main():
 
         path_folder = os.path.abspath(output_folder)
         if os.path.exists(path_folder):
-            sys.exit("Error: a folder with that name already exists. Please provide a folder name using the -o argument to save the results.")
+            sys.exit("Error: a folder with that name already exists. Please provide a folder name with different name using the -o argument to save the results.")
 
         os.makedirs(output_folder)
         path_folder=os.path.abspath(output_folder)
@@ -3399,8 +3428,8 @@ def main():
     html_content += create_html_footer()
     html_report = write_html(html_content, file_path_report, log)
     
-    # path=f'{output}/html_all_modules.txt'
-    # with open(path, 'w') as f:
+    #path=f'{output}/html_all_modules.txt'
+    #with open(path, 'w') as f:
     #    f.write(html_content)  
 
     #----------------------------------------------------------------------------------------------------------------------------

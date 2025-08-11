@@ -119,6 +119,7 @@ python EvalTree.py -h
 #### 2. Install via Conda
 
 ```bash
+conda install insapathogenomics::evaltree
 conda install -c joana.gomes evaltree
 ```
 
