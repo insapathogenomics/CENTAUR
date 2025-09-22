@@ -24,7 +24,7 @@ def test_arguments_default():
     if not os.path.exists(output):
         os.mkdir(output)
 
-    cmd= f"python {script_path} -i1 {input1} -i2 {input2} -o {output} -cp country -pt MST-7x1.0"
+    cmd= f"python {script_path} -i1 {input1} -i2 {input2} -o {output} -cp country -pt 7"
     subprocess.check_output(cmd, shell=True)
 
     GT_clusters_partition=pd.read_csv(os.path.join(output,"GT_clusters_partitions.tsv"), sep='\t', header=None)
