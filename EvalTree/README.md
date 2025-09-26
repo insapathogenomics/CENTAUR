@@ -217,7 +217,7 @@ python EvalTree.py -i1 X_partitions.tsv -i2 Y_partitions.tsv
 ```
  - Two ReporTree folders to generate clustering visualizations
 ```bash
-python EvalTree.py -i1 input1 -i2 input2 -o output -ps partitions_summary -pt MST-7x1.0 -cp name_column -to "MST-7x1.0,MST-7x1.0;<=MST-7x1.0,MST-9x1.0"
+python EvalTree.py -i1 input1 -i2 input2 -o output -ps partitions_summary -pt 7 -cp name_column -to "7,7;<=7,9"
 ```
   #### Installation via Conda OR PyPi using:
   - Two input files
