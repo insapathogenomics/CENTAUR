@@ -6,8 +6,8 @@ By Joana Gomes Pereira
 @INSA
 
 """
-version = "1.0.1"
-last_updated = "2025-09-22"
+version = "1.0.2"
+last_updated = "2025-11-28"
 
 import datetime
 import argparse
@@ -410,7 +410,7 @@ def check_str_plots_threshold(plots_thresholds):
     values=[]
     for th in thresholds:
         if not re.match(pattern, th):
-            sys.exit(f"\tError: You need speciefy integer values thresholds that are present in the partitions_summary or SAMPLE_OF_INTEREST_paritions_sumary files. Multiple plots must be separated by commas and without spaces.")
+            sys.exit(f"\n\tError: You need speciefy integer thresholds that are present in the partitions_summary or SAMPLE_OF_INTEREST_paritions_sumary files. Multiple plots must be separated by commas and without spaces.\n")
         values.append(th)
     
     return values
@@ -559,7 +559,8 @@ def check_combinations_arguments(plots_summary_arg, data_folder, data_files):
                     errors.append(f'\tError: It is impossible to use the {elem} argument when input file(s) are provided.\n')
 
     if errors:
-        sys.exit("\nThe following problems were found:\n" + "".join(errors))
+        #sys.exit("\nThe following problems were found:\n" + "".join(errors))
+        sys.exit("\n" + "".join(errors))
     
     return go_clustering, go_outbreaks
 
@@ -1089,9 +1090,8 @@ def join_inputs_variables(data_folder, data_files):
 
         if i1 is None and i2 is None:
             sys.exit("\tError: It is impossible to proceed the analysis")
-        else:
-            print(f'\nChecking the command line:')
-            print(f'\tThe provided arguments are all compatible. Everything is ready to run EvalTree.py :)\n')
+        #else:
+            #print(f'\nChecking the command line:')
 
     return inputs_variables
 
@@ -2346,45 +2346,92 @@ def transfer_info_to_html_content(path_temp, html_content, log):
   
 ################################################################  MODULE 1  ################################################################################
 
-def reading_sequence_type(sequence_type_file, output, prefix_st, log):
+def reading_sequence_type(sequence_type_file, traditional_typing_category):
 
     """
-    Reading the sequence type matrix.
+    Reading the sequence type matrix to check if the introduced argument is valid.
 
     Parameters
     ----------
     sequence_type: str
         Full path to the sequence type matrix.
-
-    output: str
-        Path to the directory where the results will be saved.
-
-    prefix_st: str
-    	The prefix that will be added to the file.
-     
+    traditional_typing_category: int
+        Number of categories to display in the bar plot.
     Returns
     -------
-    fig: plotly.graph_objs._figure.Figure
-        Code to produce figure
+    pairs: list of tuples
+        Pairs of categories (nr_samples, category) to display in the plot.
     """
-
-    #print_log(f'\n---------------------------------------------- Function: reading_sequence_type----------------------------------------------\n', log)
     
-    df=pd.read_table(sequence_type_file)
-    column=df.columns[1]
+    df = pd.read_table(sequence_type_file)
+    column = df.columns[1]
 
-    name_cluster=[]
-    nr_cluster=[]
+    name_cluster = []
+    nr_cluster = []
 
     for elem in df[column]:
         if elem not in name_cluster:
             name_cluster.append(elem)  
             number = df[column].tolist().count(elem) 
             nr_cluster.append(number)
-            
-    new_df = pd.DataFrame({"Cluster": name_cluster, "Count": nr_cluster})
-    fig = px.bar(new_df, x="Cluster", y="Count", title=f"Most represented STs in the {prefix_st} pipeline", labels={"Cluster": "Cluster name", "Count": "Number of samples"})
-    fig.update_layout(title_x=0.5)
+
+    pairs = list (zip(nr_cluster, name_cluster))
+    n_pairs = len(pairs)
+    
+    nr_max_ttc = [1, n_pairs]
+    if not min(nr_max_ttc) <= traditional_typing_category <= max(nr_max_ttc): 
+        sys.exit(f"\tError:Invalid number of categories in -ttc argument. Must be between 1 and {nr_max_ttc[-1]}.")
+
+    
+
+def make_plot_traditional_typing(pairs, traditional_typing_category, output, prefix_st, sequence_type_file, log):
+
+    """
+    Prodution of a bar plot of traditional method, according to the number of categories selected by user.
+
+    Parameters
+    ----------
+    pairs: list
+    traditional_typing_category:
+    output:
+    prefix_st:
+
+    Returns
+    -------
+    fig: plotly.graph_objs._figure.Figure
+        Code to produce figure
+    """
+
+
+    #print_log(f'\n---------------------------------------------- Function: make_plot_traditional_typing----------------------------------------------\n', log)
+
+    df = pd.read_table(sequence_type_file)
+    column = df.columns[1]
+
+    name_cluster = []
+    nr_cluster = []
+
+    for elem in df[column]:
+        if elem not in name_cluster:
+            name_cluster.append(elem)  
+            number = df[column].tolist().count(elem) 
+            nr_cluster.append(number)
+
+    pairs = list (zip(nr_cluster, name_cluster))
+
+    top = sorted (pairs, reverse = True) [:traditional_typing_category]
+
+    biggest_nr = []
+    corresponding_name = []
+
+    for number, name in top:
+        biggest_nr.append(number)
+        corresponding_name.append(name)
+    parts = prefix_st.split("_")[-1]
+    nums_str = [str(x) for x in corresponding_name]
+    new_df = pd.DataFrame({"Cluster": nums_str, "Count": biggest_nr})
+    fig = px.bar(new_df, x = "Cluster", y = "Count", title = f"Most represented {parts} in the {prefix_st} pipeline", labels = {"Cluster": parts, "Count": "Number of samples"})
+    fig.update_layout(title_x = 0.5)
     fig.write_image(f'{output}/{prefix_st}_pipeline_clusters.png', format='png')
     
     return fig
@@ -2657,8 +2704,8 @@ def congruence_tendency(fig_tendency_html, score_value, prefix_both, nr_point_me
             <p class="compact"> This graph shows the corresponding points(thresholds) between the two pipelines in both directions above (CS >= {score_value}). </p>      
             <p class="compact"> When comparing a set of samples between two pipelines, the probability of two sample clustering together in one method/pipeline in a given threshold
             may not to be the same in the other method/pipeline. Therefore:</p>
-            <p class="compact"> - First, the threshold in the {pipeline1} pipeline (method 1) that produces clustering results most similar to those in the {pipeline2} pipeline (method 2) is identified. </p>
-            <p class="compact"> - Then, the threshold in the {pipeline2} pipeline (method 1) that produces clustering results most similar to those in the {pipeline1} pipeline (method 2) is identified.</p>
+            <p class="compact"> - Orange line, the threshold in the {pipeline2} pipeline (method 2) that produces clustering results most similar to those in the {pipeline1} pipeline (method 1) is identified.</p>
+            <p class="compact"> - Blue line, the threshold in the {pipeline1} pipeline (method 2) that produces clustering results most similar to those in the {pipeline2} pipeline (method 1) is identified. </p>
             <p class="compact"> Both methods produce similar clustering results when the tendency line has a slope near 1. </p>
             <p class="compact">A linear tendency line supported by {nr_point_method_1} (blue) and {nr_point_method_2} (orange) points is presented. </p>
             <p class="compact"> Detailed information is available in the <code> {prefix_both}_All_correspondence.tsv </code> file. </p>
@@ -2877,18 +2924,18 @@ def main():
     #-------------------------------------------------------------------------------------------------------------------------------------
     #  Configures the parser for command line arguments
 
-    parser = argparse.ArgumentParser(description="Running EvalTree")
-    parser = argparse.ArgumentParser(prog="EvalTree.py",
-                                    formatter_class=argparse.RawDescriptionHelpFormatter,
-                                    description=textwrap.dedent("""                                                                                                                                   
+    parser = argparse.ArgumentParser(description = "Running EvalTree")
+    parser = argparse.ArgumentParser(prog = "EvalTree.py",
+                                    formatter_class = argparse.RawDescriptionHelpFormatter,
+                                    description = textwrap.dedent("""                                                                                                                                   
     EvalTree.py
     
-    EvalTree is a tool developed for pairwise comparisons of genomic clustering typing data from two typing pipelines (e.g., cg/wgMLST, SNP, sequence-type or serotype tables)  
+    EvalTree is a tool developed for pairwise comparisons of genomic clustering typing data from two typing pipelines (e.g., WGS (e.g., cg/wgMLST, SNP), or traditional typing (sequence-type or serotype) tables)  
     based on a previously developed methodology for inter-pipeline cluster comparison (Mixão et al., 2025; https://doi.org/10.1038/s41467-025-59246-8).
     
     The main applications of this tool are:     
     - Evaluate the cluster congruence between the pipelines of different laboratories, supporting inter-laboratory communication and cooperation in a One Health framework.
-    - Ensure the long-term sustainability of any pipeline by supporting informed decision-making during the whole life-cycle (e.g., assessing the impact of software modifications).
+    - Ensure the long-term sustainability of any pipeline by supporting informed decision-making during the whole life-cycle (e.g., assessing the impact of software modifications, including parameters, versitons etc).
 
     EvalTree accepts two types of inputs (folders and files):
     - Clustering information files at all possible threshold levels of two typing methods (e.g., sequence-type, serotypes, allele-based pipelines, etc). 
@@ -2921,7 +2968,7 @@ def main():
 
     parser.add_argument('-v', '--version',
         action='version',
-        version='EvalTree 1.0.1, last update 2025-09-22', 
+        version='EvalTree 1.0.2, last update 2025-11-28', 
         help='[OPTIONAL] Specify the version number of EvalTree.')
 
     parser.add_argument("-i1", "--input1",
@@ -3037,6 +3084,13 @@ def main():
             type = float,
             help = '[OPTIONAL] The neighborhood Adjusted Wallace Coefficient (nAWC) threshold used to determine if a clustering threshold is considered consistent or stable.')
     
+    parser.add_argument('-ttc', '--traditional_typing_category', 
+            dest = 'traditional_typing_category',
+            default = 5,
+            type = int,
+            help = '[OPTIONAL] Select the values of the category of traditional typing (e.g., serotype, sequence type), with high number of samples.')
+
+
     #------------------------------------------------------------------
     # INITIAL INFORMATIONS    
     # Read the command line arguments and retrieve paths
@@ -3079,7 +3133,7 @@ def main():
         print(f"\t\tPrefix: {prefix_file}")
         print(f'\t\tDirectory: {path_directory}')
         data_files += [[file, prefix_file, path_directory, file_type, n_samples, n_groups]]  #6
-    
+    print(f'\nChecking remaining arguments in the command line:')
     #----------------------------------------------------------------
     #   I2- Check the output argument (-o)
     if args.output != None:
@@ -3101,7 +3155,7 @@ def main():
                     else:
                         sys.exit(f"There is no partitions_summary file in the {sub[2]}. ")
                 else:
-                    file_s_interest=sub[4]
+                    file_s_interest = sub[4]
                     if file_s_interest is not None:
                         get_plot_columns(file_s_interest)   
                     else:
@@ -3195,11 +3249,9 @@ def main():
         if i1 is not None and i2 is not None:       
             go_congruence = True
             nr_threshold_df1, nr_threshold_df2 = nr_thresholds (i1,i2)
-
         else:
             print("Congruence analysis is not possible. It is necessary two *_partitions.tsv files.\n")
     
-
     #---------------------------------------------------------------------------------------------------
     # VII- Outbreaks 
     if threshold_outbreak is not None:
@@ -3211,7 +3263,7 @@ def main():
         if args.output is None:
             sys.exit('Error: Please specify the output folder with the -o argument. It should contain the previous results (e.g outbreak analysis).')  
         
-        file=glob.glob(os.path.join(output,'*_report.html'))
+        file = glob.glob(os.path.join(output,'*_report.html'))
         if not file: 
             sys.exit("Error: The expected *_report.html file was not found. Please run the program first with the -to argument, and then with the -rto argument.")
 
@@ -3227,19 +3279,27 @@ def main():
             sys.exit("Error: thr_stability must be between 0 and 1.")
 
     #--------------------------------------------------------------------------------------------------
+    # IX - Traditional typing (-traditional_typing_category)
+    traditional_typing_category = args.traditional_typing_category
+
+    for sub in inputs_variables:
+        if len(sub) == 6:
+            if sub[3] == False:
+                sequence_type_file = sub[0]
+                pairs = reading_sequence_type(sequence_type_file, traditional_typing_category)
+    #--------------------------------------------------------------------------------------------------
     # Starting logs	
     
     if not repeat_threshold_outbreak:
         log_name = (f'{output}/{prefix_both}.log')
         log = open(log_name, "w+")
-
     else:     
         log_name = (f'{output}/{prefix_both}_reanalyse.log')
         log = open(log_name, "w+")
 
     # -------------------------------------------------------------------------------------------------------------------------
     # INITIAL INFORMATIONS
-
+    print(f'\tThe provided arguments are all compatible. Everything is ready to run EvalTree.py :)\n')
     print("---------------------------------------------- Running EvalTree.py ----------------------------------------------\n")
     print_log(f"Version " + str(version) + " last updated on " + str(last_updated)+"\n", log)
     command_line = " ".join(sys.argv)
@@ -3278,8 +3338,8 @@ def main():
                         groups_st = sub[5]
                         sequence_type_file = sub[0]
                         prefix_st = sub[1]
-                        html_content += get_sequence_type(prefix_st,samples_st,groups_st,sequence_type_file)
-                        fig_clusters = reading_sequence_type(sequence_type_file, output, prefix_st, log)
+                        html_content += get_sequence_type(prefix_st, samples_st, groups_st, sequence_type_file)
+                        fig_clusters = make_plot_traditional_typing(pairs, traditional_typing_category, output, prefix_st, sequence_type_file, log)
                         fig_html = pio.to_html(fig_clusters, include_plotlyjs='cdn', full_html=False)
                         html_content += sequence_type_image(fig_html)
 
