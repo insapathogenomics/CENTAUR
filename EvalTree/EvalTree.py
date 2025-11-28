@@ -6,8 +6,8 @@ By Joana Gomes Pereira
 @INSA
 
 """
-version = "1.0.0"
-last_updated = "2025-07-31"
+version = "1.0.1"
+last_updated = "2025-09-22"
 
 import datetime
 import argparse
@@ -399,18 +399,18 @@ def check_str_plots_threshold(plots_thresholds):
     Return
     ------
     plots_thresholds: list
-        Valid list of plot thresholds in the format 'METHOD-NxM.M' (e.g., MST-4x1.0)
+        List of number/thresholds to do the plots
     """     
     #print(f'\n---------------------------------------------- Function: check_str_plots_thresholds ----------------------------------------------\n')   
 
-    pattern = r'^[A-Za-z]+-\d+x\d+\.\d+$'
+    pattern =  r'^\d+$'
 
     thresholds = [th for th in plots_thresholds.split(",")]
 
     values=[]
     for th in thresholds:
         if not re.match(pattern, th):
-            sys.exit(f"\tError: The value '{th}' does not follow the expected format (e.g., METHOD-NxM.M). Multiple plots must be separated by commas and without spaces.")
+            sys.exit(f"\tError: You need speciefy integer values thresholds that are present in the partitions_summary or SAMPLE_OF_INTEREST_paritions_sumary files. Multiple plots must be separated by commas and without spaces.")
         values.append(th)
     
     return values
@@ -452,96 +452,99 @@ def check_combinations_arguments(plots_summary_arg, data_folder, data_files):
     go_outbreaks = False
 
     if data_folder:
-        for elem in data_folder:
-            partitions_summary = elem[3] 
-            sample_of_interest = elem[4] 
-            cluster_composition = elem[5] 
-            input_path = elem[2] 
-            stable_regions = elem[6]
 
-            if type_file == 'sample_of_interest':
+        has_cp = '-cp' in args
+        has_pt = '-pt' in args
+        has_pcp = '-pcp' in args
+        has_pcn = '-pcn' in args
 
-                has_cp = '-cp' in args
-                has_pt = '-pt' in args
-                has_pcp = '-pcp' in args
-                has_pcn = '-pcn' in args
+        if type_file == 'sample_of_interest':
+            
+            if not has_cp:
+                errors.append("\tError: For clustering analysis you must specify the column plots (-cp) argument with SAMPLE_OF_INTEREST_partitions_summary file.\n")
 
-                
+            if not has_pt:
+                errors.append("\tError: For clustering analysis you must specify the plots threshold (-pt) argument with SAMPLE_OF_INTEREST_partitions_summary file.\n")
+
+            if '-n' in args:
+                errors.append("\tError: It is impossible to use -n argument with SAMPLE_OF_INTEREST_partitions_summary file.\n")
+
+            if has_pcp or has_pcn:
                 if not has_cp:
-                    errors.append("\tError: For clustering analysis you must specify the column plots (-cp) argument with SAMPLE_OF_INTEREST_partitions_summary file.\n")
-
+                    errors.append("\tError: Using '-pcp' or '-pcn' requires '-cp' to be specified.\n")
                 if not has_pt:
-                    errors.append("\tError: For clustering analysis you must specify the plots threshold (-pt) argument with SAMPLE_OF_INTEREST_partitions_summary file.\n")
+                    errors.append("\tError: Using '-pcp' or '-pcn' requires '-pt' to be specified.\n")
+            
+            if has_cp and has_pt:
+                if len(data_folder) == 1:
+                    if data_folder[0][4] is None:
+                        errors.append("\t Error: Impossible carry out the clustering visualization without SAMPLE_OF_INTEREST file.\n")
 
-                if sample_of_interest is None:
-                    errors.append(f"\tError: The file SAMPLE_OF_INTEREST_partitions_summary does not exist in {input_path}.\n")
-
-                if '-n' in args:
-                    errors.append("\tError: It is impossible to use -n argument with SAMPLE_OF_INTEREST_partitions_summary file.\n")
-
-                if has_pcp or has_pcn:
-                    if not has_cp:
-                        errors.append("\tError: Using '-pcp' or '-pcn' requires '-cp' to be specified.\n")
-                    if not has_pt:
-                        errors.append("\tError: Using '-pcp' or '-pcn' requires '-pt' to be specified.\n")
-                    if sample_of_interest is None:
-                        errors.append("\tError: Using '-pcp' or '-pcn' requires the SAMPLE_OF_INTEREST_partitions_summary file to be present.\n")
+                if len(data_folder) == 2:
+                    if data_folder[0][4] is None and data_folder[1][4] is None:
+                        errors.append("\t Error: Impossible carry out the clustering visualization without SAMPLE_OF_INTEREST file.\n")
 
                 go_clustering = True
 
-            if type_file == 'partitions_summary':
+        #-------------------------------------------------  
+        if type_file == 'partitions_summary':
 
-                has_cp = '-cp' in args
-                has_pt = '-pt' in args
-                has_custom_clustering = any(opt in args for opt in ['-n', '-pcp', '-pcn'])
+            has_custom_clustering = any(opt in args for opt in ['-n', '-pcp', '-pcn'])
 
-                if has_custom_clustering:
-                    if not has_cp:
-                        errors.append(f"\tError: Missing argument '-cp'.\n")
-                    if not has_pt:
-                        errors.append(f"\tError: Missing argument '-pt'.\n")
-                    if partitions_summary is None:
-                        errors.append(f"\tError: Missing partitions_summary file.\n")
-                    go_clustering = len(errors) == 0
-                elif has_cp and has_pt:
-                    if partitions_summary is not None:
-                        go_clustering = True
-                    else:
-                        errors.append(f"\tError: To run clustering with '-cp' and '-pt', you must also provide a valid partitions_summary file.\n")
-                        go_clustering = False
-                elif has_cp and not has_pt:
-                    errors.append(f"\tError: Missing argument '-pt'. Both '-cp' and '-pt' are required to run clustering analysis.\n")
-                    go_clustering = False
-                elif has_pt and not has_cp:
-                    errors.append(f"\tError: Missing argument '-cp'. Both '-cp' and '-pt' are required to run clustering analysis.\n")
-                    go_clustering = False
-                else:
-                   
-                    go_clustering = False
+            if has_custom_clustering:
+                if not has_cp:
+                    errors.append(f"\tError: Missing argument '-cp'.\n")
+                if not has_pt:
+                    errors.append(f"\tError: Missing argument '-pt'.\n")
 
-            
-            if stable_regions is None:
-                if '-n_stab' in args:
-                    errors.append(f'\tError: It is impossible to use the -n_stab argument when the file stableRegions does not exist.\n')
-                if '-n_thr' in args:
-                    errors.append(f'\tError: It is impossible to use the -n_thr argument when the file stableRegions does not exist.\n')
+            if has_cp and not has_pt:
+                errors.append(f"\tError: Missing argument '-pt'. Both '-cp' and '-pt' are required to run clustering analysis.\n")
                 
-            if '-to' in args:
-                if cluster_composition is None:
-                    errors.append(f'\tError: It is impossible to use the -to argument when the cluster_composition file is not in {input_path}.\n')
-            
-            if '-to' in args and len(data_folder) == 1:
-                errors.append(f'\tError: It is impossible to use the -to argument only with one folder.\n')
-                        
+            if has_pt and not has_cp:
+                errors.append(f"\tError: Missing argument '-cp'. Both '-cp' and '-pt' are required to run clustering analysis.\n")
+
+            if has_cp and has_pt:
+                if len(data_folder) == 1:
+                    if data_folder[0][3] is None:
+                        errors.append("\t Error: Impossible carry out the clustering visualization without partitions_summary file.\n")
+
+                if len(data_folder) == 2:
+                    if data_folder[0][3] is None and data_folder[1][3] is None:
+                        errors.append("\tError: Impossible to carry out clustering visualization without partitions_summary file.\n")
+                go_clustering = True
+
+    #-------------------------------------------------  
+    #if len(data_folder) == 2:
+        #if data_folder[0][6] is None and data_folder[1][6] is None:     
+
+    #if '-n_stab' in args:
+        #errors.append(f'\tError: It is impossible to use the -n_stab argument when the file stableRegions does not exist.\n')
+    #if '-n_thr' in args:
+        #errors.append(f'\tError: It is impossible to use the -n_thr argument when the file stableRegions does not exist.\n')
+
+    for elem in data_folder: 
+        input_path = elem[2] 
+        cluster_composition = elem[5]            
+        if '-to' in args:
+            if cluster_composition is None:
+                errors.append(f'\tError: It is impossible to use the -to argument when the cluster_composition file is not in {input_path}.\n')
+
+    #-------------------------------------------------        
+    if '-to' in args and len(data_folder) == 1:
+        errors.append(f'\tError: It is impossible to use the -to argument only with one folder.\n')
+
+    #-------------------------------------------------                
     if '-to' in args and len(data_files) == 1:
         errors.append(f'\tError: It is impossible to use the -to argument with input files.\n')
 
+    #---------------------------------------------------------------------
     if len(data_folder) == 2:
         if '-to' in args:
             if len(data_folder[0]) == 7 and len(data_folder[1]):
                 if data_folder[0][5] is not None and data_folder [1][5] is not None:
                     go_outbreaks = True
 
+    #---------------------------------------------------------------------
     cluster_args = ['-cp', '-pt', '-n', '-ps', '-pcn', '-pcp']
     if data_files:
         if len(data_files) == 2:
@@ -556,10 +559,10 @@ def check_combinations_arguments(plots_summary_arg, data_folder, data_files):
                     errors.append(f'\tError: It is impossible to use the {elem} argument when input file(s) are provided.\n')
 
     if errors:
-        unique_errors = set(errors)
-        sys.exit(f"\nThe following problems were found:\n {' '.join(unique_errors)}")
-            
+        sys.exit("\nThe following problems were found:\n" + "".join(errors))
+    
     return go_clustering, go_outbreaks
+
 
 def check_data_folders_file(data_folder, data_files):
 
@@ -1143,9 +1146,7 @@ def order_cluster_by_size(df_data, log):
 
     if 'cluster_length' in df_data.columns:
         df_filtered = df_data.sort_values(by = 'cluster_length', ascending=False)
-        #print_log(f'\t\tOrdering clusters by cluster-length (values in descending order)...', log)
     else:
-        #print_log(f'\t\tOrdering clusters by cluster-length is not possible because, cluster-length column is not present in the file...', log)
         df_filtered = None
 
     return df_filtered
@@ -1154,7 +1155,6 @@ def check_plot_threshold(plots_thresholds, df_filtered, log):
     
     """
     Checking if the plots_threshold argument contains one or more integer thresholds.
-    Generating the MST structure for each threshold as present in the file (sample_of_interest or partition_summary).
 
     Parameters
     ----------
@@ -1165,54 +1165,25 @@ def check_plot_threshold(plots_thresholds, df_filtered, log):
     Return
     ------
     method: list
-        A list of thresholds in the format 'MST-{value}x1.0'.  
+        
     """
     #print_log(f'\n---------------------------------------------- Function: check_plots_thresholds ----------------------------------------------\n', log)
-   
-    name_threshold_in_df = df_filtered.iloc[:,0].unique().tolist()  
-    method = []
-    for elem in plots_thresholds:
-        if elem  in name_threshold_in_df:
-            method.append(elem)
-        else:
-            print_log(f"\tThe plot threshold argument (method) {elem} does not exist in the file.", log)
-
-    return method
-
-def check_threshold_in_file(method, df_filtered, clustering_file, log):
     
-    """
-    Look for the unique thresholds in the file (*_partitions_summary.tsv or *_SAMPLE_OF_INTEREST_partitions_summary.tsv)
-    Check if the threshold(s) entered exist in the selected file.
+    thresholds = sorted(set(plots_thresholds), key=int)
+    
+    name_threshold_in_df = df_filtered.iloc[:,0].unique().tolist()  
 
-    Parameters
-    ----------
-    method: list
-        A list of thresholds in the format 'MST-{value}x1.0'.
-    df_filtered: pandas.DataFrame
-        A dataframe containing data from the selected file.
-    clustering_file: str
-        Path to the file (partitions_summary or sample_of_interest)
+    method = []
 
-    Return
-    ------
-    filtered_threshold: list
-        List of valid thresholds that will be applied to df_filtered.
-    """
-    #print_log(f'\n---------------------------------------------- Function: check_threshold_in_file ----------------------------------------------\n', log)
-
-    all_lines_in_one_column = df_filtered.iloc[:,0] 
-    unique_threshold = all_lines_in_one_column.unique().tolist()
-        
-    filtered_threshold = []
-      
-    for elem in method:
-        if elem not in unique_threshold:
-            print(f'\tThe plot threshold argument (method) entered {elem} does not exist in the {clustering_file}...')   
-        else:    
-            filtered_threshold.append(elem)
- 
-    return filtered_threshold
+    for elem in thresholds:
+        matches = [i for i in name_threshold_in_df if elem == i.split('-')[-1].split('x')[0]]
+        if matches:
+             for m in matches:
+                method.append(m)
+        else:
+            print(f'\t\tThe threshold {elem} does not exist in the file.')
+    
+    return method
 
 def filter_df_by_plot_threshold(filtered_threshold, df_filtered, n_cluster, log):
 
@@ -1283,7 +1254,7 @@ def filtering_df_threshold(filtered_threshold, df_filtered, log):
     """
     #print_log(f'\n---------------------------------------------- Function: filtering_df_threshold ----------------------------------------------\n', log)
 
-    head=df_filtered.columns.tolist()
+    head = df_filtered.columns.tolist()
     name_partition = head[0]
     
     results = []
@@ -1409,8 +1380,10 @@ def check_structure_lines_column_plots(check_columns, result_df, plots_category_
                 values = []
 
                 for elem in components_row:
-                    label, percentage = elem.split(" (")
-                    percentage_value = percentage [:-2]  
+                    label = " (".join(elem.split(" (")[:-1])  
+                    percentage = elem.split(" (")[-1].replace(")", "")
+                    #label, percentage = elem.split(" (")
+                    percentage_value = percentage [:-1]  
                     category.append(label)
                     values.append(float(percentage_value))
 
@@ -1429,7 +1402,7 @@ def check_structure_lines_column_plots(check_columns, result_df, plots_category_
                     percentage = sum(list_values)
                     remaining_percentage = 100 - percentage
                     if remaining_percentage != 0:
-                        list_category.append('Others')
+                        list_category.append('Other')
                         list_values.append(remaining_percentage) 
 
                 #--------------------------------------------------------
@@ -1452,7 +1425,7 @@ def check_structure_lines_column_plots(check_columns, result_df, plots_category_
                         size = len(other_values)
                         list_category = category[:-size]
                         list_values = values[:-size]                        
-                        list_category.append('Others')
+                        list_category.append('Other')
                         list_values.append(percentage)
                     else:
                         list_category = category    
@@ -1471,14 +1444,49 @@ def check_structure_lines_column_plots(check_columns, result_df, plots_category_
                 #Production of image
 
                 df = pd.DataFrame({'Category': list_category, 'Percentage': list_values})
-                fig = px.pie(df, values = 'Percentage', names = 'Category', title = f'{cluster_rename}')  
-                fig.update_traces(marker = dict(colors = colors))
-
-                fig.update_layout(title_x = 0.5, annotations = [dict(
-                                            x = 0.5,
-                                            y = -0.2,
-                                            text = f'Number of samples: {n_cluster_length}<br>{sample_increase}',showarrow=False)])  
+                fig = px.pie(df, values='Percentage', names='Category', title=f'{cluster_rename}')
                 
+                # Update traces (each slice)
+                fig.update_traces(
+                    marker=dict(colors=colors),    # set colors
+                    textposition='outside',        # place percentages outside
+                    textinfo='percent',            # show percentage
+                    automargin=True                # automatically adjust margins
+                )
+
+                # Update chart layout
+                fig.update_layout(
+                     # Title
+                    title=dict(
+                        text=f'{cluster_rename}',
+                        x=0.5,           # center horizontally
+                        y=0.97,          # move title closer to top
+                        xanchor='center',
+                        yanchor='top'
+                    ),
+                     # Legend
+                    legend=dict(
+                        orientation="h",  # horizontal
+                        yanchor="top",
+                        y=-0.4,           # place below the chart
+                        xanchor="center",
+                        x=0.5
+                    ),
+                    # Annotation with number of samples and sample increase
+                    annotations=[
+                        dict(
+                            x=0.5,
+                            y=-0.4,
+                            #xref="paper",
+                            #yref="paper",
+                            text=f'Number of samples: {n_cluster_length}<br>{sample_increase}',
+                            showarrow=False
+                        )
+                    ],
+                    # Margins to prevent cutting off text or chart elements
+                    margin=dict(t=120, b=150, l=60, r=60)  # space for title, legend, and annotations
+                )
+
                 fig.write_image(f'{output}/{prefix}_{mst}_{col}_{cluster_rename}.png', format="png")              
                 result_dict = {'A': mst, 'B': col, 'C': fig}    
                 results_list.append(result_dict)
@@ -1635,14 +1643,14 @@ def get_graph_partition_by_threshold(file_partition_by_threshold, prefix, prefix
                              labels = {'partitions': 'Partitions', 'threshold': 'Threshold'})
     
     if threshold != 'max':
-        values= threshold.split('-')
-        first_value=int(values[0])
-        second_value=int(values[1]) 
-        values_list= [str(i) for i in range(first_value, second_value + 1)]
-        n_elem=len(values_list)
-        index_list=list(range(0, n_elem))
+        values = threshold.split('-')
+        first_value = int(values[0])
+        second_value = int(values[1]) 
+        values_list = [str(i) for i in range(first_value, second_value + 1)]
+        n_elem = len(values_list)
+        index_list = list(range(0, n_elem))
 
-        text_list=['A']
+        text_list = ['A']
         for elem in values_list:
             text_list.append(elem)
 
@@ -1823,26 +1831,28 @@ def change_processing_data(final_df, i1_prefix, i2_prefix, output, log):
     """
 
     #print_log(f'\n---------------------------------------------- Function: change_processing_data----------------------------------------------\n', log)
-
-    df_final = final_df.rename(columns={"Finish": "temp"})
+ 
+    #df_final = final_df.rename(columns={"Finish": "temp"})
     
+    df = final_df.iloc[::-1]
+    df_final = df.rename(columns={"Finish": "temp"})
+   
     df_final['temp']=np.log2(df_final['temp'])
     df_final['Start'] = np.log2(df_final['Start'])
     df_final['Finish'] = df_final['temp'] - df_final['Start']
-    df1_inverted = df_final.iloc[::-1]  
-     
-    max_val = df1_inverted["temp"].max()
+
+    max_val = df_final["temp"].max()
     max_val_1= int(round(2 ** max_val,0))
     list_tickvals = list(range(1, max_val_1 + 1))
     list_ticktext= [str (2 ** x) for x in range(1, max_val_1 + 1)]
     
-
-    fig_st = px.bar(df1_inverted,
+    fig_st = px.bar(df_final,
                     x="Finish",
                     y="Block_id",
                     base='Start',
                     color="Pipeline",  
-                    orientation="h")
+                    orientation="h",
+                    color_discrete_map={i1_prefix: "blue", i2_prefix: "red"})
 
     fig_st.update_layout(
                     xaxis_title = "Threshold",
@@ -1858,7 +1868,6 @@ def change_processing_data(final_df, i1_prefix, i2_prefix, output, log):
         prefix=f'{i1_prefix}_vs_{i2_prefix}'
 
     fig_st.write_image(f'{output}/{prefix}_StableRegions.png', format='png')
-
 
     return fig_st
 
@@ -1893,38 +1902,32 @@ def validate_combinations_outbreak(threshold_outbreak):
     """
     #print(f'\n---------------------------------------------- Function: validate_combinations_outbreak----------------------------------------------\n')
 
-    regex = r'^[A-Za-z]+-\d+x\d+\.\d+$'
+    
     valid_combinations = []  
     combos = threshold_outbreak.split(';')
     
     for combo in combos:
        
         parts = combo.split(',')
-         
+                
         if len(parts) != 2:
-            sys.exit(f"The combination '{combo}' must have 2 elements separated by a comma (e.g., 'MST-7x1.0,MST-7x1.0'). Multiple combinations must be separated by ; . Please, do not use spaces.")
+            sys.exit(f"The combination '{combo}' must have 2 elements separated by a comma (e.g., '7,7'). Multiple combinations must be separated by ; . Please, do not use spaces.")
 
-        pattern1 = parts[0]
-
-        if parts[1].startswith('<='):
-            pattern2 = parts[1][2:]
-        else:
-            pattern2 = parts[1]
-        
-        if not re.match(regex, pattern1):
-            sys.exit(f"Error: Pattern '{pattern1}' (part 1) is not in the correct format (e.g., 'MST-7x1.0'). Please, do not use spaces.")
-
-        if not re.match(regex, pattern2):
-            sys.exit(f"Error: Pattern '{parts[1]}' (part 2) is not in the correct format (e.g., 'MST-7x1.0' or '<=MST-10x1.0'). Please, do not use spaces.")
  
         if parts[1].startswith('<='):
-            valid_combinations.append([parts[0], parts[1], 'lower_equal'])
+            pattern2 = parts[1][2:]
+            valid_combinations.append([parts[0], pattern2, 'lower_equal'])
+        
+        elif parts[0].startswith('<='):
+            pattern1 = parts[0][2:]
+            valid_combinations.append([pattern1, parts[1], 'lower_equal'])
+
         else:
             valid_combinations.append([parts[0], parts[1], 'equal'])
 
     return valid_combinations
 
-def extract_integer_part(valid_combinations, log):
+def extract_integer_part(valid_combinations, nr_threshold_df1, nr_threshold_df2):
 
     """
     Extract the integer thresholds from string-formatted threshold.
@@ -1940,16 +1943,41 @@ def extract_integer_part(valid_combinations, log):
         List of tuples [(integer, integer, type_comparison)] with the extracted integer values and the comparison type,
         to be used in the command-line call of the script `stats_outbreak_script.py`
     """
-    #print_log(f'\n---------------------------------------------- Function: extract_integer_part----------------------------------------------\n', log)
+    #print(f'\n---------------------------------------------- Function: extract_integer_part----------------------------------------------\n')
 
     values_outbreak = []
+    errors_outbreak=[]
 
     for p1, p2, comp in valid_combinations:
-        n1 = int(p1.split('-')[1].split('x')[0])
-        n2 = int(p2.split('-')[1].split('x')[0])
-        values_outbreak.append((n1, n2, comp))
+
+        try:
+            n1 = int(p1)
+            n2 = int(p2)
+                    
+            if (
+                n1 > 0 and n2 > 0
+                and n1 <= nr_threshold_df1
+                and n2 <= nr_threshold_df2
+            ):
+                values_outbreak.append((n1, n2, comp))
+            else:
+                errors_outbreak.append(f"Invalid combination: {p1}, {p2}, because the partitions_1 has a maximum {nr_threshold_df1} and  partitions_2 {nr_threshold_df2} thresholds.")
+
+        except ValueError:
+            errors_outbreak.append(f"Invalid combination: {p1}, {p2}")
+            errors_outbreak.append(f'Please ensure that the speciefied thresholds are integers, without spaces, and lower than the number of thresholds in cluster composition.')
+            continue  
+
+    
+    if errors_outbreak:
+        print("\nThe following outbreak problems were found:")
+        unique_errors=set(errors_outbreak)
+        for erro in unique_errors:
+            print(f" - {erro}")  
+        sys.exit()
 
     return values_outbreak
+
 
 def creation_tsv_stats_outbreak(clusterComposition_1, clusterComposition_2, output, prefix_both, log):
 
@@ -2055,8 +2083,24 @@ def read_files_outbreak(output):
             process_files.append(abs_path_file)
     
     return process_files
-  
-def creation_overlap_clusters(process_files, output, values_oubreak):
+
+def outbreak_summary(output, thr1, thr2, type_com, prefix_both):
+
+    #print(f'\n---------------------------------------------- Function: outbreak_summary ----------------------------------------------\n')
+
+    path_file=f'{output}/{prefix_both}_stats_outbreak_summary_{thr1}_{type_com}_{thr2}.tsv'
+    df = pd.read_table(path_file)
+    v1 = df.loc[0,"exact_composition_all"]
+    v2 = df.loc[0,"n"]
+    v3 = df.loc[1,"exact_composition_all"]
+    v4 = df.loc[1,"n"]
+
+    pipe1=v1/v2*100
+    pipe2=v3/v4*100
+         
+    return v1,v2,v3,v4
+
+def creation_overlap_clusters(process_files, output, values_oubreak, prefix_both):
 
     """
     Production of the graphics with the overlap genetic clusters according the threshold outbreak.
@@ -2084,16 +2128,16 @@ def creation_overlap_clusters(process_files, output, values_oubreak):
         for path in process_files:
             if f'_{th1}_{type_compo}_{thr2}_' in path:
                 result.append([th1,thr2,type_compo,path])
-
+   
     fig_result=[]   
     thresholds=[]
     for i in result:
-        file=i[3]
-        thr1=i[0]
-        thr2=i[1]
-        type_com=i[2]
+        file = i[3]
+        thr1 = i[0]
+        thr2 = i[1]
+        type_com = i[2]
 
-        df=pd.read_table(file) 
+        df = pd.read_table(file) 
         df_filtered = df.drop(df.columns[0], axis=1)
         
         if df_filtered.shape[1] == 2:
@@ -2105,30 +2149,44 @@ def creation_overlap_clusters(process_files, output, values_oubreak):
             values_col1 = df_filtered.columns[0]
             values_col2 = df_filtered.columns[1]
             
-        df_percentage= df_filtered*100
-        name_file=os.path.basename(file)
-        base, ext=os.path.splitext(name_file)
+        df_percentage = df_filtered * 100
+        
+        name_file = os.path.basename(file)
+        base, ext = os.path.splitext(name_file)
 
-        if type_com=='equal':
-            string1=f'at {thr1} threshold'
-            string2=f'at {thr2} threshold'
+        if type_com =='equal':
+            string1 = f'at {thr1} threshold'
+            string2 = f'at {thr2} threshold'
         else:
-            string1=f'at {thr1} threshold'
-            string2=f'at up {thr2} threshold'
+            string1 = f'at {thr1} threshold'
+            string2 = f'at up {thr2} threshold'
         thresholds.append((thr1,thr2,type_com))
         
         colors = [[0, 'white'], [0.5, 'white'], [0.5, '#FDFD96'], [1, '#89B6E3']]  
+        
+        v1, v2, v3, v4 = outbreak_summary(output, thr1, thr2, type_com, prefix_both)
+
+        df_extra = pd.DataFrame(
+            index=df_percentage.index,
+            columns=df_percentage.columns)
+
+        df_extra.iloc[0,0] = f"{v2}/{v2}"
+        df_extra.iloc[0,1] = f"{v1}/{v2}"
+        df_extra.iloc[1,0] =  f"{v3}/{v4}"
+        df_extra.iloc[1,1] = f"{v4}/{v4}"
+    
+        text_matrix = (df_percentage.round(2).astype(str) + "%<br>" + df_extra)
 
         fig = go.Figure(data=go.Heatmap(
-            z=df_percentage.values,  
-            x =[f'{values_col1}', f'{values_col2}'],
-            y =[f'{values_col1}', f'{values_col2}'],
-            text=df_percentage.values,
-            texttemplate="%{text:.2f}%",  
+            z=df_percentage,
+            x=[f'{values_col1}', f'{values_col2}'],
+            y=[f'{values_col1}', f'{values_col2}'],
+            text=text_matrix,
+            texttemplate="%{text}",
             textfont=dict(size=11, color="black"),
             colorscale=colors, 
             colorbar=dict(title="Overlap"),
-            zmin=0, zmax=100
+            zmin=0, zmax=100,
         ))
 
         fig.update_layout(
@@ -2139,8 +2197,10 @@ def creation_overlap_clusters(process_files, output, values_oubreak):
 
         fig.write_image(f'{output}/{base}.png', format="png")
         fig_result.append(fig)
-        
+
     return fig_result, thresholds
+
+
 
 def get_plot_columns(file):
 
@@ -2575,8 +2635,13 @@ def congruence_heatmap(fig_html_heatmap, prefix_both):
     html_content=f"""
         <h3> Congruence score </h3>
         <div class='image-heatmap'>{fig_html_heatmap} </div>
-            <p class="compact"> The heatmap shows a pairwise comparison of clustering results from two pipelines, {first} and {second}, at all possible distance thresholds. </p>
-            <p class="compact"> The congruence score (CS) is a metric ranging from 0 (no congruence between methods) to 3 (absolute congruence).</p>
+            <p class="compact"> The heatmap presents a pairwise comparison of clustering results obtained from two pipelines, {first} and {second}, at all possible distance thresholds.</p>
+            <p class="compact"> For each threshold, the cluster composition generated by two pipelines are compared, and a congruence score is computed (CS).</p>
+            <p class="compact"> The CS is based on Adjusted Wallace coefficient (AWC) and Adjusted Rand (AR).</p>
+            <p class="compact"> The AWC measures the probability that two samples that cluster together by one method (at a given threshold level) will also cluster together 
+            by another one (at a given threshold level). This calculation is performed in both directions (method A → method B and method B → method A) for all thresholds.</p>
+            <p class="compact"> AR evaluates the overall agreement between the typing methods. The congruence score (CS= AWC A→B + AWC B→A + AR) ranges from 0 indicating \
+            low congruence, to 3 indicating absolute congruence.</p>            
             <p class="compact"> Detailed information is available in the <code> {prefix_both}_final_score.tsv </code> file.</p>
     """
     return html_content
@@ -2600,6 +2665,16 @@ def congruence_tendency(fig_tendency_html, score_value, prefix_both, nr_point_me
             <p style="margin-bottom: 8px;"></p>
         </div>
     """
+    return html_content
+
+def without_congruence_tendency(prefix_both):
+
+    html_content= f"""
+        <h3> Corresponding points </h3>
+        <p class="compact"> Without corresponding points between pipelines {prefix_both}.</p>
+        <p style="margin-bottom: 8px;"></p>
+        </div>
+        """
     return html_content
 
 def congruence_st(fig_html_heatmap, prefix_both):
@@ -2654,6 +2729,7 @@ def summary_outbreak(prefix_both, thresholds):
     html_content += f"""</div> """
     
     return html_content
+
 
 def references():
 
@@ -2725,7 +2801,7 @@ def create_html_footer():
 
 def close_painel(prefix, message=None):
     html_content = f"""
-    <button class="accordion">Clusters {prefix}</button>
+    <button class="accordion">ReporTree clustering visualization: {prefix}</button>
     <div class="panel">
     """
 
@@ -2753,7 +2829,31 @@ def is_folder_empty(folder_path):
     if os.path.exists(folder_path) and not os.listdir(folder_path):
         sys.exit(f"The folder '{folder_path}' exists but is empty.") 
 
+def check_output_corresponding_points(output):
+    """
+    Check if there is correspoinding points between two methods
+    """
+    
+    all_correspondence=glob.glob(output + '/*_All_correspondence.tsv')[0]
+    df = pd.read_csv(all_correspondence, sep = "\t")
+ 
+    if len(df) == 0:
+        corresponding_point_true = False
+    else:
+        corresponding_point_true = True
+    
+    return corresponding_point_true
 
+
+def nr_thresholds (i1,i2):
+
+    df1 = pd.read_table(i1)
+    df2 = pd.read_table (i2)
+    nr_columns_df1 = (len(df1.columns)-1)
+    nr_columns_df2 = (len(df2.columns)-1)
+    
+    return nr_columns_df1, nr_columns_df2
+    
 #####################################################################################################################################
 ###################################################################***###############################################################
 ###############################################################***EvalTree***##########################################################
@@ -2783,67 +2883,86 @@ def main():
                                     description=textwrap.dedent("""                                                                                                                                   
     EvalTree.py
     
-    EvalTree was designed for comparing two genomic pipeline inputs (e.g., cg/wgMLST, traditional sequence-type matrix), with three main functionalities:
-
-    - Evaluates the congruence between the pipelines.
-    - Characterizes genetic clusters.
-    - Detects closely related outbreak clusters at given thresholds.
+    EvalTree is a tool developed for pairwise comparisons of genomic clustering typing data from two typing pipelines (e.g., cg/wgMLST, SNP, sequence-type or serotype tables)  
+    based on a previously developed methodology for inter-pipeline cluster comparison (Mixão et al., 2025; https://doi.org/10.1038/s41467-025-59246-8).
     
-    The EvalTree toolbox accepts two types of inputs: folders and files.
-    - Folders must be derived from ReporTree outputs (highly recommended). Pipelines of cg/wgMLST should contain clustering data (clusters and/or singletons) for
-     all possible thresholds in a partition.tsv file.
-    - Files can be partition files or other types of files with classifications (e.g., sequence-type, serotypes).
-    It will return an interactive HTML report based on the selected arguments.
+    The main applications of this tool are:     
+    - Evaluate the cluster congruence between the pipelines of different laboratories, supporting inter-laboratory communication and cooperation in a One Health framework.
+    - Ensure the long-term sustainability of any pipeline by supporting informed decision-making during the whole life-cycle (e.g., assessing the impact of software modifications).
 
-    The following arguments are used for specific analyses:
+    EvalTree accepts two types of inputs (folders and files):
+    - Clustering information files at all possible threshold levels of two typing methods (e.g., sequence-type, serotypes, allele-based pipelines, etc). 
+    - To take the most benefit of tool, a ReporTree (Mixão et al., 2023; https://doi.org/10.1186/s13073-023-01196-1) folder with cluster composition and characterization files can be provided.
+    The main output is a HTML report with multiple interactive plots and comprehensive source data, generated according to the specified arguments.  
 
-    - plot_summary, plots_threshold, column_plot, n_cluster, plots_category_number, plots_category_percentage: These are used exclusively to characterize genetic clusters from
-    ReporTree output files (e.g., *_partitions_summary.tsv).
-    - score and threshold: These are used in the cg/wgMLST pipeline congruence analysis.
-    - threshold_outbreak, repeat_threshold_outbreak: These are used in the outbreak analysis, utilizing the cluster_composition.tsv file produced by ReporTree."""))
+    Types of analyses performed by EvalTree
+    Depending on the user-defined arguments, EvalTree can perform different analyses:  
+
+    1 - Pipeline characterization
+        - Determines the number of partitions (groups) present across all possible thresholds.
+        - When ReporTree folders are provided, an additional interactive visualization of clusters according to available metadata is generated.
+        Available arguments:
+        - Starting point: input, output, list, version, help
+        - ReporTree clustering visualization: plot_summary, plots_threshold, column_plot, n_cluster, plots_category_number, plots_category_percentage    
+
+    2 - Inter-pipeline cluster congruence
+        - Evaluates the congruence of clusters between two typing pipelines by assessing genetic cluster composition through a congruence score obtained from pairwise comparisons across all possible thresholds.
+        - Identifies stability regions, defined as threshold ranges where cluster composition is similar between pipelines.
+        Available arguments:
+        - Stability regions: n_stability, thr_stability
+        - Congruence: threshold, score
+
+    3 - Outbreak analyses
+        - Detects potential outbreak cluster signals.
+        Available arguments:
+        - Outbreak detection: threshold_outbreak, repeat_threshold_outbreak   """))
 
     # Mandatory arguments
+
+    parser.add_argument('-v', '--version',
+        action='version',
+        version='EvalTree 1.0.1, last update 2025-09-22', 
+        help='[OPTIONAL] Specify the version number of EvalTree.')
+
     parser.add_argument("-i1", "--input1",
             action = "store",
             required = True,
-            help = '[MANDATORY] Specifies the first input type (folder or file), requiring the full path. \
-                    The folder must contain the partition matrix file with clustering data, and is highly recommended to be a Reportree output folder.\
-                    Alternatively, the file can be a traditional sequence-type matrix or a partition matrix.\
-                    Using either of these input types enables the analysis.')
+            help = '[MANDATORY] Specify the first input type (folder or file) and requires the full path. \
+                    If a folder is provided, it must contain the partition table with clustering data at all possible threshold levels.\
+                    Alternatively, individual clustering table files from traditional methods or WGS-based methods can be supplied.')
 
     parser.add_argument("-i2", "--input2",
             action = "store", 
             required = False,
-            help = '[OPTIONAL] Specifies the second input type (folder or file), requiring the full path. \
-                    The folder must contain the partition matrix file with clustering data, and is highly recommended to be a Reportree output folder. \
-                    Alternatively, the file can be a traditional sequence-type matrix or a partition matrix. \
-                    Using either of these input types enables the analysis.')
+            help = '[OPTIONAL] Specify the second input type (folder or file) and requires the full path. \
+                    If a folder is provided, it must contain the partition table with clustering data at all possible threshold levels.\
+                    Alternatively, individual clustering table files from traditional methods or WGS-based methods can be supplied.')
     
     parser.add_argument("-o", "--output",
             action = "store",
-            help = '[OPTIONAL] Specifies the output directory for storing all analysis results. \
+            help = '[OPTIONAL] Specify the output directory for storing all analyses results. \
                     If no folder is provided, the program will automatically create one based on the prefix of the files.')
 
     # Optional arguments
     parser.add_argument('-s', '--score',
             dest = 'score',
             default = '2.85',
-            help = '[OPTIONAL] Define a minimum score to consider two partitions (one from each pipeline) as corresponding. The score accepts values between 0 and 3.\
-                Partition - It refer to the number of identical clusters that exist at the same threshold.')
+            help = '[OPTIONAL] Define a minimum score to consider two partitions (one from each pipeline) as corresponding. The score accepts values between 0 (low congruence) and 3 (high congruence).')
     
     parser.add_argument('-t', '--threshold', 
             dest = 'threshold', 
             default = 'max', 
-            help = '[OPTIONAL] Defines an integer range to select or filter threshold columns from the partition matrix file. \
-                    A filtered partition matrix, containing only the selected columns, will be created and used for subsequent analysis. \
-                    Ranges are specified using a hyphen to separate the minimum and maximum values (e.g., 10-20). \
+            help = '[OPTIONAL] Define an integer threshold range to select or filter threshold columns from the partition table file. \
+                    A filtered partition table, containing only the selected columns, will be created and used for subsequent analysis. \
+                    Threshold ranges are specified using a hyphen to separate the minimum and maximum values (e.g., 10-20). \
                     If this option is not set, the script will perform clustering for all possible thresholds in the range 0 to the maximum threshold.')
     
     parser.add_argument('-ps', '--plots_summary', 
             dest = 'plots_summary', 
             choices = ['partitions_summary','sample_of_interest'], 
             default = 'partitions_summary',
-            help = '[OPTIONAL] Specify the type of cluster characterization file (partitions_summary.tsv or SAMPLES_OF_INTEREST_partitions_summary.tsv), both of which are expected to be located within a Reportree results folder. \
+            help = '[OPTIONAL] Specify the type of cluster characterization file (partitions_summary.tsv or SAMPLES_OF_INTEREST_partitions_summary.tsv.\
+                    Both files are expected to be located within a ReporTree folder. \
                     Using the partition_summary option, the largest clusters present in the file will be characterized. \
                     Alternatively, the samples_of_interest option will characterize all clusters, including those resulting from the addition of new samples (kept increase, new, new (increase), new (merge_increase), new (split_increase), new (split_merge_increase)).')
            
@@ -2851,51 +2970,50 @@ def main():
             dest = 'n_cluster',
             type = int,
             default = 3,
-            help = '[OPTIONAL] Specify the number of top clusters to be displayed from the partitions_summary.tsv file, which must be located within a Reportree results folder. \
-                    This argument is not applicable when using the samples_of_interest option.')
+            help = '[OPTIONAL] Specify the number of top clusters to be displayed from the partitions_summary.tsv file, which must be located within a ReporTree results folder. \
+                    This argument is not applicable when using the sample_of_interest option.')
     
     parser.add_argument('-cp', '--columns_plots', 
             dest = 'columns_plots', 
             help = '[OPTIONAL] Name(s) of the column(s) to process the characterization of the clustering data in the selected file (specified by the plots_summary argument). \
-                    For multiple column names, indicate them separated by commas without spaces (e.g., column1,column2).')
+                    For multiple column names (categories), indicate them separated by commas without spaces (e.g., column1,column2).')
     
     parser.add_argument('-pt','--plots_threshold',
-            dest='plots_threshold',
-            help='[OPTIONAL] Identify the integer threshold(s) to be applied to the file specified by the plots_summary argument. \
+            dest ='plots_threshold',
+            help = '[OPTIONAL] Identify the integer threshold(s) to be applied to the file specified by the plots_summary argument. \
                     For multiple thresholds, indicate them separated by commas without spaces (e.g., X,Y,Z). \
                     This generates a pie chart showing the clustering data for the specified threshold(s), according to the columns_plot argument.')
 
     parser.add_argument('-pcn','--plots_category_number',
-            dest='plots_category_number',
-            default=5,
-            type=int,
-            help='[OPTIONAL] Determines the number of plot categories in the partitions_summary.tsv or SAMPLES_OF_INTEREST_partitions_summary.tsv file\
+            dest = 'plots_category_number',
+            default = 5,
+            type = int,
+            help = '[OPTIONAL] Determine the number of plot categories in the partitions_summary.tsv or SAMPLES_OF_INTEREST_partitions_summary.tsv file\
             that are intended to be collapsed into the '"Other"' category for visualization in the cluster plots.\
-            When there are more than 5 slices (default), they will be combined into one category named Other')
+            When there are more than 5 slices/segments (default), they will be combined into one category named "Other".')
     
     parser.add_argument('-pcp','--plots_category_percentage',
-            dest='plots_category_percentage',
-            type=float,
-            help='[OPTIONAL] Determines the percentage of plot categories in the partitions_summary.tsv or SAMPLES_OF_INTEREST_partitions_summary.tsv file\
-            that are intended to be collapse into the '"Other"'category for visualization in the cluster plots.\
-            Slices plots with a lower percentage than the entered plots_category_percentage will be combined into one category named Others')
+            dest = 'plots_category_percentage',
+            type = float,
+            help = '[OPTIONAL] Determine the percentage of plot categories in the partitions_summary.tsv or SAMPLES_OF_INTEREST_partitions_summary.tsv file\
+            that are intended to be collapse into the "Other" category for visualization in the cluster plots.\
+            Slices/segments plots with a lower percentage than the entered plots_category_percentage will be combined into one category named "Other".')
     
     parser.add_argument('-to', '--threshold_outbreak',
             dest='threshold_outbreak',
             type=str,
-            help='[OPTIONAL] Determine the number of clusters identified in one pipeline at a given threshold \
-            that will exist with the same composition in another pipeline at the same or a higher threshold.\
-            Full attention, this argument has its own structure: two threshold (strings-methods) and the type of comparison is \
-                either equal (defined by , ) or lower_equal (defined by <= ) \
-                Threshold1: Threshold at which the genetic clusters must be identified for the pipeline of interest.\
-                Threshold2: Threshold at which the genetic clusters must be searched in the other pipelines.\
-                Comparison (equal or lower equal): \
-                    - ''equal'': Used to assess whether a cluster is detected at a given threshold by another pipeline. \
-                        Use a comma '','' to separate threshold1,threshold2. Example of expression: MST-7x1.0,MST-7x1.0.\
-                    - ''lower_equal'': Used to assess whether a cluster is detected up to a given threshold in another pipeline. \
-                        Use <= between threshold1<=threshold2. Example of expression: MST-7x1.0,<=MST-9x1.0.\
-                            \
-                For multiple pair of threshold values, use '';'' as a separator. Example of expression: "MST-7x1.0,MST-7x1.0;<=MST-7x1.0,MST-10x1.0" represents two pair of threshold values.')
+            help='[OPTIONAL] Determine the number of clusters identified in one pipeline (rows) at a given threshold \
+            that were also detected with the exact same cluster composition at a (or up to a) given threshold in the other pipeline (columns).\
+            This argument has a specific structure: it requires two thresholds and the type of comparison (fixed or dynamic threshold).\n \
+            Threshold1: Threshold at which the genetic clusters are identified in the pipeline of interest.\
+            Threshold2: Threshold at which the genetic clusters are searched in the other pipeline.\
+            Comparison (fixed or dynamic): \
+                - Fixed: Direct cluster comparison at specific threshold between two pipelines.\
+                    Use a comma '','' to separate threshold1 and threshold2. Example: 7,7.\
+                - Dynamic: Range of threshold to find genetic clusters with similar composition in the other pipeline.\
+                    Use <= to indicate a dynamic threshold range. Example of expression: 7,<=9.\
+                \
+                For multiple threshold pairs, separate them with a semicolon. Example: "7,7;<=7,10" represents two threshold pair.')
     
     parser.add_argument('-list', '--list',
             dest='list',
@@ -2905,18 +3023,13 @@ def main():
     parser.add_argument('-rto','--repeat_threshold_outbreak',
             dest='repeat_threshold_outbreak',
             action="store_true",
-            help='[OPTIONAL] This argument can only be used after of a previous analysis of threshold_outbreak.')
-    
-    parser.add_argument('-v', '--version',
-            action='version',
-            version='EvalTree 1.0.0, last update 2025-07-31', 
-            help='[OPTIONAL] Specify the version number of EvalTree.')
-    
+            help='[OPTIONAL] This argument can only be used after of a previous analysis of threshold_outbreak and generate a second HTML report.')
+       
     parser.add_argument('-n_stab', '--n_stability',
             dest = 'n_stability',
             default = 5,
             type = int,
-            help = '[OPTIONAL] Range of threshold which the cluster composition can be conistent/stable.')
+            help = '[OPTIONAL] Range of threshold which the cluster composition can be similar.')
     
     parser.add_argument('-thr_stab', '--thr_stability',
             dest = 'thr_stability',
@@ -3059,7 +3172,7 @@ def main():
     # V - Rename ouput folder if it was automatically created
     if args.output == None:
         output_folder = prefix_both 
-
+        #path_folder = os.path.join(directory_toolbox, output_folder)
         path_folder = os.path.abspath(output_folder)
         if os.path.exists(path_folder):
             sys.exit("Error: a folder with that name already exists. Please provide a folder name with different name using the -o argument to save the results.")
@@ -3081,13 +3194,17 @@ def main():
         
         if i1 is not None and i2 is not None:       
             go_congruence = True
+            nr_threshold_df1, nr_threshold_df2 = nr_thresholds (i1,i2)
 
         else:
             print("Congruence analysis is not possible. It is necessary two *_partitions.tsv files.\n")
-
+    
 
     #---------------------------------------------------------------------------------------------------
-    # VII- Outbreaks (-rto) 
+    # VII- Outbreaks 
+    if threshold_outbreak is not None:
+        if valid_combinations != []:
+            values_outbreak = extract_integer_part(valid_combinations, nr_threshold_df1, nr_threshold_df2)
 
     if repeat_threshold_outbreak is not False:
         
@@ -3146,11 +3263,9 @@ def main():
         html_report = write_html(html_content,file_path_report, log)
 
     #-------------------------------------------------------------------------------------------------------------------------------
-
     if not repeat_threshold_outbreak: 
 
         #-------------------------------------------------------------------------------------------------------------------------------
-
         if inputs_variables:
             for sub in inputs_variables:
 
@@ -3201,7 +3316,6 @@ def main():
                         fig_partition_vs_threshols = get_graph_partition_by_threshold(file_partition_by_threshold, prefix, prefix_both, yes_prefix_both, output, threshold, log)
                         html_content += get_partitions_threshold(prefix, nr_lines_df, nr_columns_df, fig_partition_vs_threshols)
                         
-
                 if go_clustering == False:
                     html_content += f'</div>\n'  
 
@@ -3223,25 +3337,24 @@ def main():
 
                         print_log(f'\tPlotting cluster characterization ...', log)  
 
-                        #----------------------------------------------------------------------- 
-                        # Starting clustering
-                        df_data=load_and_prepare_data(plots_file, log)
-                        df_filtered=order_cluster_by_size(df_data, log)
-                        
-                        #----------------------------------------------------------------------- 
-                        if df_filtered is not None:
-                            method = check_plot_threshold(plots_thresholds, df_filtered, log)
+                        if plots_file is not None:
+                            
+                            #----------------------------------------------------------------------- 
+                            # Starting clustering
+                            df_data=load_and_prepare_data(plots_file, log)
+                            df_filtered=order_cluster_by_size(df_data, log)
+                            
+                            #----------------------------------------------------------------------- 
+                            if df_filtered is not None:
+                                method = check_plot_threshold(plots_thresholds, df_filtered, log)
 
-                            if method != []:     
-                                filtered_threshold = check_threshold_in_file(method, df_filtered, plots_file, log)  
-                                
-                                if filtered_threshold != []:  
+                                if method != []:     
 
                                     if plots_summary_arg == 'partitions_summary': 
-                                        result_df = filter_df_by_plot_threshold(filtered_threshold, df_filtered, n_cluster, log)
+                                        result_df = filter_df_by_plot_threshold(method, df_filtered, n_cluster, log)
 
                                     if plots_summary_arg == 'sample_of_interest':
-                                        df_filtered_threshold = filtering_df_threshold(filtered_threshold, df_filtered, log)
+                                        df_filtered_threshold = filtering_df_threshold(method, df_filtered, log)
                                         result_df = select_nomenclature_change(df_filtered_threshold, log)            
                                     
                                     if result_df is not None:
@@ -3267,17 +3380,16 @@ def main():
                                     else:
                                         html_content += close_painel(prefix,"Error: No data for processing, without clustering analysis.")
                                         print_log(f'\tError: No data for processing, without clustering analysis.', log)   
+
                                 else:
-                                    html_content += close_painel(prefix,"Error: The plot_threshold argument is invalid, without clustering analysis.")
-                                    print_log(f'\tError: The plot_threshold argument is invalid, without clustering analysis. ', log)
+                                    html_content += close_painel(prefix,"Error: The method provided is not available, without a clustering analysis.")
+                                    print_log(f"\tError: The method provided is not available, without a clustering analysis.",log)
                             else:
-                                html_content += close_painel(prefix,"Error: The method provided is not available, without a clustering analysis.")
-                                print_log(f"\tError: The method provided is not available, without a clustering analysis.",log)
+                                html_content += close_painel(prefix,"Error: Impossible to order the Dataframe by cluster length,  without clustering analysis.")
+                                print_log(f'\tError: Impossible to order the Dataframe by cluster length, without clustering analysis.')
                         else:
-                            html_content += close_painel(prefix,"Error: Impossible to order the Dataframe by cluster length,  without clustering analysis.")
-                            print_log(f'\tError: Impossible to order the Dataframe by cluster length, without clustering analysis.')
-                    else:
-                        html_content += f'</div>\n'
+                            html_content += close_painel(prefix,"Error: Something is wrong. Perhaps the file does not exist.")
+                            html_content += f'</div>\n'
 
         #-------------------------------------------------------------------------------------------------------------------------------
             print_log(f"\nInter-pipeline cluster congruence analysis:\n", log)
@@ -3335,7 +3447,6 @@ def main():
                 try:
                     name_block = processing_block_names(file, prefix, log)
                     first_data, final_data = processing_data(file, log)
-                    
                     df = pd.DataFrame({'Block_id': name_block, 'Start': first_data, 'Finish': final_data, 'Pipeline': prefix})
                     all_dfs.append(df)
                     prefix_df.append(prefix)
@@ -3382,10 +3493,14 @@ def main():
             # Get best correspondence          
             
             if  not any(len(elem) == 6 and elem[3] is False for elem in inputs_variables): 
-                fig_tendency, nr_point_method_1, nr_point_method_2 = get_tendency(output, prefix_both, threshold,log)
-                fig_tendency_html = pio.to_html(fig_tendency,include_plotlyjs='cdn', full_html=False)
-                html_content += congruence_tendency(fig_tendency_html, score_value, prefix_both, nr_point_method_1, nr_point_method_2)
-                comparison = tendency_slop(path_all_correspondence_lower, i1_prefix, i2_prefix, output)
+                corresponding_point_true = check_output_corresponding_points(output)
+                if corresponding_point_true == True :
+                    fig_tendency, nr_point_method_1, nr_point_method_2 = get_tendency(output, prefix_both, threshold,log)
+                    fig_tendency_html = pio.to_html(fig_tendency,include_plotlyjs='cdn', full_html=False)
+                    html_content += congruence_tendency(fig_tendency_html, score_value, prefix_both, nr_point_method_1, nr_point_method_2)
+                    comparison = tendency_slop(path_all_correspondence_lower, i1_prefix, i2_prefix, output)
+                else:
+                    html_content += without_congruence_tendency(prefix_both)
     #-------------------------------------------------------------------------------------------------------------------------------
     # MODULE 5 - OUTBREAK
     
@@ -3393,12 +3508,11 @@ def main():
         
         #----------------------------------------------------------------------- 
         clusterComposition_1 = inputs_variables[0][5]
-        clusterComposition_2 = inputs_variables[1][5]
-
-        if valid_combinations != []:
-
+        clusterComposition_2 = inputs_variables[1][5]          
+            
+           
+        if values_outbreak != []:
             print_log(f"\tThreshold outbreaks was validated successfully.", log)
-            values_outbreak = extract_integer_part(valid_combinations, log)
             print_log(f"\tAssessing the overlap of cluster composition.\n", log)
             df_stats_outbreak, path_stats_outbreak = creation_tsv_stats_outbreak(clusterComposition_1, clusterComposition_2, output, prefix_both, log) 
 
@@ -3406,7 +3520,7 @@ def main():
             if values_outbreak:
                 calling_script_outbreak(python, stats_outbreak_script, path_stats_outbreak, output, prefix_both, values_outbreak, log)
                 process_files = read_files_outbreak(output)
-                fig_result, thresholds = creation_overlap_clusters(process_files, output, values_outbreak)
+                fig_result, thresholds = creation_overlap_clusters(process_files, output, values_outbreak, prefix_both)
                 print_log(f"\tPlotting the matrices with the cluster overlap for each comparison", log)
                 
                 if not repeat_threshold_outbreak:

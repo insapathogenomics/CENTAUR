@@ -26,7 +26,7 @@ def test_arguments():
     if not os.path.exists(output):
         os.mkdir(output)
  	
-    result= subprocess.check_output(f"python {script_path} -i1 {input1} -i2 {input2} -o {output} -s 2.95 -t 2-28 -ps partitions_summary -pt MST-7x1.0,MST-8x1.0 -cp country,source -n 4 -to \"MST-7x1.0,MST-7x1.0;MST-8x1.0,<=MST-20x1.0\" ", shell=True)
+    result= subprocess.check_output(f"python {script_path} -i1 {input1} -i2 {input2} -o {output} -s 2.95 -t 2-28 -ps partitions_summary -pt 7,8 -cp country,source -n 4 -to \"7,7;8,<=20\" ", shell=True)
 
 # check input 1 files (GT)
 
@@ -270,9 +270,9 @@ def test_RTO_argument():
  
     # Teste for the -RTO argument
     result= subprocess.check_output(f"python {script_path} -i1 {input1} -i2 {input2} -o {output} -s 2.95 -t 2-28"
-                                    f" -ps partitions_summary -pt MST-7x1.0,MST-8x1.0 -cp country,source -n 4 -to \"MST-5x1.0,MST-5x1.0;MST-8x1.0,<=MST-10x1.0\" -rto ",
+                                    f" -ps partitions_summary -pt 7,8 -cp country,source -n 4 -to \"5,5;8,<=10\" -rto ",
                                     shell=True)
-
+    
     GT_vs_HC_stats_outbreak_pairwise_comparison_5_equal_5=pd.read_csv(os.path.join(output,"GT_vs_HC_stats_outbreak_pairwise_comparison_5_equal_5_pct.tsv"), sep='\t', header=None)
     num_lines, num_columns =GT_vs_HC_stats_outbreak_pairwise_comparison_5_equal_5.shape
     assert num_lines==3
@@ -313,7 +313,7 @@ def test_plots_category_percentage():
 
     result = subprocess.check_output(
         f"python {script_path} -i1 {input1} -i2 {input2} -o {output} -s 2.95 -t 2-28 "
-        f"-ps partitions_summary -pt MST-7x1.0,MST-8x1.0 -cp country,source -n 4 -to \"MST-5x1.0,MST-5x1.0;MST-8x1.0,<=MST-10x1.0\" -pcp 60",
+        f"-ps partitions_summary -pt 7,8 -cp country,source -n 4 -to \"5,5;8,<=10\" -pcp 60",
         shell=True
     )
 
@@ -351,7 +351,7 @@ def test_sequence_type_and_folder():
 
     result=subprocess.check_output(
         f"python {script_path} -i1 {input1} -i2 {input2} -o {output} -s 2.95 -t 2-28 "
-        f"-ps partitions_summary -pt MST-7x1.0,MST-8x1.0 -cp country,source -n 4", shell=True)
+        f"-ps partitions_summary -pt 7,8 -cp country,source -n 4", shell=True)
 
     all_files=len(os.listdir(output))
     images = glob.glob(f"{output}/*.png")
@@ -413,7 +413,7 @@ def test_plots_category_number():
 
     result = subprocess.check_output(
         f"python {script_path} -i1 {input1} -i2 {input2} -o {output} -s 2.95 -t 2-28 "
-        f"-ps partitions_summary -pt MST-7x1.0 -cp country -n 4 -pcn 1",
+        f"-ps partitions_summary -pt 7 -cp country -n 4 -pcn 1",
         shell=True
     )
 
@@ -472,6 +472,7 @@ def test_file_vs_folder():
 
     all_files=len(os.listdir(output))
     assert all_files == 20
+    shutil.rmtree(output)
 
 def test_file_vs_file():
 
@@ -490,6 +491,7 @@ def test_file_vs_file():
 
     all_files=len(os.listdir(output))
     assert all_files == 15
+    shutil.rmtree(output)
 
 def test_file_mx_partition():
 
@@ -511,7 +513,43 @@ def test_file_mx_partition():
     all_files=len(os.listdir(output))
     assert all_files == 20
 
+    shutil.rmtree(output)
+
+def test_one_folder():
+
+    main_path = os.path.dirname(__file__)  
+    path = os.path.dirname(main_path)  
+    script_path = os.path.join(path, "EvalTree.py")
+    input1 = os.path.join(main_path, 'input1')
+    output = os.path.join(main_path, 'TEST2', 'one_folder')
+
+    if not os.path.exists(output):
+        os.mkdir(output)
+
+        result = subprocess.check_output(
+        f"python {script_path} -i1 {input1} -o {output} -n_stab 6 -thr_stab 0.98 -pt 7 -cp source", shell=True)
+
+    all_files=len(os.listdir(output))
+    assert all_files == 11
+
+    shutil.rmtree(output)
+
+def test_only_single_command():
+
+    main_path = os.path.dirname(__file__)  
+    path = os.path.dirname(main_path)
+    script_path = os.path.join(path, "EvalTree.py")
+    input1 = os.path.join(main_path, 'input1')
+    output = os.path.join(main_path, "TEST2", 'GT')
+
+    if not os.path.exists(output):
+        os.mkdir(output)
+
+    result = subprocess.check_output(f"python {script_path} -i1 {input1} -o {output}", shell=True)
+    
+    all_files=len(os.listdir(output))
+    assert all_files == 8
+
 
     file_path = os.path.join(main_path, "TEST2")
     shutil.rmtree(file_path)
-    

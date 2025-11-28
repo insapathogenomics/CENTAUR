@@ -131,59 +131,83 @@ pip install evaltree
 ## Usage
 
   ```bash
-   -h, --help           Show this help message and exit
-  -i1 INPUT1, --input1 INPUT1
-                        [MANDATORY] Specifies the first input type (folder or file), requiring the full path. The folder must contain the partition matrix file with clustering data, and is highly recommended
-                        to be a Reportree output folder. Alternatively, the file can be a traditional sequence-type matrix or a partition matrix. Using either of these input types enables the analysis.
-  -i2 INPUT2, --input2 INPUT2
-                        [OPTIONAL] Specifies the second input type (folder or file), requiring the full path. The folder must contain the partition matrix file with clustering data, and is highly recommended
-                        to be a Reportree output folder. Alternatively, the file can be a traditional sequence-type matrix or a partition matrix. Using either of these input types enables the analysis.
-  -o OUTPUT, --output OUTPUT
-                        [OPTIONAL] Specifies the output directory for storing all analysis results. If no folder is provided, the program will automatically create one based on the prefix of the files.
-  -s SCORE, --score SCORE
-                        [OPTIONAL] Define a minimum score to consider two partitions (one from each pipeline) as corresponding. The score accepts values between 0 and 3. Partition - It refers to the number of
-                        identical clusters that exist at the same threshold.
-  -t THRESHOLD, --threshold THRESHOLD
-                        [OPTIONAL] Defines an integer range to select or filter threshold columns from the partition matrix file. A filtered partition matrix, containing only the selected columns, will be
-                        created and used for subsequent analysis. Ranges are specified using a hyphen to separate the minimum and maximum values (e.g., 10-20). If this option is not set, the script will
-                        perform clustering for all possible thresholds in the range 0 to the maximum threshold.
-  -ps {partitions_summary,sample_of_interest}, --plots_summary {partitions_summary,sample_of_interest}
-                        [OPTIONAL] Specify the type of cluster characterization file (partitions_summary.tsv or SAMPLES_OF_INTEREST_partitions_summary.tsv), both of which are expected to be located within a
-                        Reportree results folder. Using the partition_summary option, the largest clusters present in the file will be characterized. Alternatively, the samples_of_interest option will
-                        characterize all clusters, including those resulting from the addition of new samples (kept increase, new, new (increase), new (merge_increase), new (split_increase), new
-                        (split_merge_increase).
-  -n N_CLUSTER, --n_cluster N_CLUSTER
-                        [OPTIONAL] Specify the number of top clusters to be displayed from the partitions_summary.tsv file, which must be located within a Reportree results folder. This argument is not
-                        applicable when using the samples_of_interest option.
-  -cp COLUMNS_PLOTS, --columns_plots COLUMNS_PLOTS
-                        [OPTIONAL] Name(s) of the column(s) to process the characterization of the clustering data in the selected file (specified by the plots_summary argument). For multiple column names,
-                        indicate them separated by commas without spaces (e.g., column1,column2).
-  -pt PLOTS_THRESHOLD, --plots_threshold PLOTS_THRESHOLD
-                        [OPTIONAL] Identify the integer threshold(s) to be applied to the file specified by the plots_summary argument. For multiple thresholds, indicate them separated by commas without
-                        spaces (e.g., X,Y,Z). This generates a pie chart showing the clustering data for the specified threshold(s), according to the columns_plot argument.
-  -pcn PLOTS_CATEGORY_NUMBER, --plots_category_number PLOTS_CATEGORY_NUMBER
-                        [OPTIONAL] Determines the number of plot categories in the partitions_summary.tsv or SAMPLES_OF_INTEREST_partitions_summary.tsv file that are intended to be collapsed into the Other
-                        category for visualization in the cluster plots. When there are more than 5 slices (default), they will be combined into one category named Other
-  -pcp PLOTS_CATEGORY_PERCENTAGE, --plots_category_percentage PLOTS_CATEGORY_PERCENTAGE
-                        [OPTIONAL] Determines the percentage of plot categories in the partitions_summary.tsv or SAMPLES_OF_INTEREST_partitions_summary.tsv file that are intended to be collapse into the
-                        Other category for visualization in the cluster plots. Slices plots with a lower percentage than the entered plots_category_percentage will be combined into one category named Others
-  -to THRESHOLD_OUTBREAK, --threshold_outbreak THRESHOLD_OUTBREAK
-                        [OPTIONAL] Determine the number of clusters identified in one pipeline at a given threshold that will exist with the same composition in another pipeline at the same or a higher
-                        threshold. Full attention, this argument has its own structure: two threshold (strings-methods) and the type of comparison is either equal (defined by , ) or lower_equal (defined by
-                        <= ) Threshold1: Threshold at which the genetic clusters must be identified for the pipeline of interest. Threshold2: Threshold at which the genetic clusters must be searched in the
-                        other pipelines. Comparison (equal or lower equal): - equal: Used to assess whether a cluster is detected at a given threshold by another pipeline. Use a comma , to separate
-                        threshold1,threshold2. Example of expression: MST-7x1.0,MST-7x1.0. - lower_equal: Used to assess whether a cluster is detected up to a given threshold in another pipeline. Use <=
-                        between threshold1<=threshold2. Example of expression: MST-7x1.0,<=MST-9x1.0. For multiple pair of threshold values, use ; as a separator. Example of expression:
-                        "MST-7x1.0,MST-7x1.0;<=MST-7x1.0,MST-10x1.0" represents two pair of threshold values.
-  -list {partitions_summary,sample_of_interest}, --list {partitions_summary,sample_of_interest}
-                        [OPTIONAL] Specify the names of the columns present in the partitions_summary.tsv or SAMPLES_OF_INTEREST_partitions_summary.tsv file.
-  -rto, --repeat_threshold_outbreak
-                        [OPTIONAL] This argument can only be used after a previous analysis of threshold_outbreak.
+  -h, --help            show this help message and exit
   -v, --version         [OPTIONAL] Specify the version number of EvalTree.
+  -i1 INPUT1, --input1 INPUT1
+                        [MANDATORY] Specify the first input type (folder or file) and requires the full path. If a
+                        folder is provided, it must contain the partition table with clustering data at all possible
+                        threshold levels. Alternatively, individual clustering table files from traditional methods or
+                        WGS-based methods can be supplied.
+  -i2 INPUT2, --input2 INPUT2
+                        [OPTIONAL] Specify the second input type (folder or file) and requires the full path. If a
+                        folder is provided, it must contain the partition table with clustering data at all possible
+                        threshold levels. Alternatively, individual clustering table files from traditional methods or
+                        WGS-based methods can be supplied.
+  -o OUTPUT, --output OUTPUT
+                        [OPTIONAL] Specify the output directory for storing all analyses results. If no folder is
+                        provided, the program will automatically create one based on the prefix of the files.
+  -s SCORE, --score SCORE
+                        [OPTIONAL] Define a minimum score to consider two partitions (one from each pipeline) as
+                        corresponding. The score accepts values between 0 (low congruence) and 3 (high congruence).
+  -t THRESHOLD, --threshold THRESHOLD
+                        [OPTIONAL] Define an integer threshold range to select or filter threshold columns from the
+                        partition table file. A filtered partition table, containing only the selected columns, will
+                        be created and used for subsequent analysis. Threshold ranges are specified using a hyphen to
+                        separate the minimum and maximum values (e.g., 10-20). If this option is not set, the script
+                        will perform clustering for all possible thresholds in the range 0 to the maximum threshold.
+  -ps {partitions_summary,sample_of_interest}, --plots_summary {partitions_summary,sample_of_interest}
+                        [OPTIONAL] Specify the type of cluster characterization file (partitions_summary.tsv or
+                        SAMPLES_OF_INTEREST_partitions_summary.tsv. Both files are expected to be located within a
+                        ReporTree folder. Using the partition_summary option, the largest clusters present in the file
+                        will be characterized. Alternatively, the samples_of_interest option will characterize all
+                        clusters, including those resulting from the addition of new samples (kept increase, new, new
+                        (increase), new (merge_increase), new (split_increase), new (split_merge_increase)).
+  -n N_CLUSTER, --n_cluster N_CLUSTER
+                        [OPTIONAL] Specify the number of top clusters to be displayed from the partitions_summary.tsv
+                        file, which must be located within a ReporTree results folder. This argument is not applicable
+                        when using the sample_of_interest option.
+  -cp COLUMNS_PLOTS, --columns_plots COLUMNS_PLOTS
+                        [OPTIONAL] Name(s) of the column(s) to process the characterization of the clustering data in
+                        the selected file (specified by the plots_summary argument). For multiple column names
+                        (categories), indicate them separated by commas without spaces (e.g., column1,column2).
+  -pt PLOTS_THRESHOLD, --plots_threshold PLOTS_THRESHOLD
+                        [OPTIONAL] Identify the integer threshold(s) to be applied to the file specified by the
+                        plots_summary argument. For multiple thresholds, indicate them separated by commas without
+                        spaces (e.g., X,Y,Z). This generates a pie chart showing the clustering data for the specified
+                        threshold(s), according to the columns_plot argument.
+  -pcn PLOTS_CATEGORY_NUMBER, --plots_category_number PLOTS_CATEGORY_NUMBER
+                        [OPTIONAL] Determine the number of plot categories in the partitions_summary.tsv or
+                        SAMPLES_OF_INTEREST_partitions_summary.tsv file that are intended to be collapsed into the
+                        Other category for visualization in the cluster plots. When there are more than 5
+                        slices/segments (default), they will be combined into one category named "Other".
+  -pcp PLOTS_CATEGORY_PERCENTAGE, --plots_category_percentage PLOTS_CATEGORY_PERCENTAGE
+                        [OPTIONAL] Determine the percentage of plot categories in the partitions_summary.tsv or
+                        SAMPLES_OF_INTEREST_partitions_summary.tsv file that are intended to be collapse into the
+                        "Other" category for visualization in the cluster plots. Slices/segments plots with a lower
+                        percentage than the entered plots_category_percentage will be combined into one category named
+                        "Other".
+  -to THRESHOLD_OUTBREAK, --threshold_outbreak THRESHOLD_OUTBREAK
+                        [OPTIONAL] Determine the number of clusters identified in one pipeline (rows) at a given
+                        threshold that were also detected with the exact same cluster composition at a (or up to a)
+                        given threshold in the other pipeline (columns).
+                        This argument has a specific structure: it requires two thresholds and the type of comparison (fixed or dynamic threshold). 
+                        Threshold1: Threshold at which the genetic clusters are identified in the pipeline of interest.
+                        Threshold2: Threshold at which the genetic clusters are searched in the other pipeline.
+                        Comparison (fixed or dynamic):
+                        - Fixed: Direct cluster comparison at specific threshold between two pipelines. Use a comma , to separate threshold1 and threshold2. Example: 7,7.
+                        - Dynamic: Range of threshold to find genetic clusters with similar composition in the other pipeline. Use <= to indicate a dynamic threshold range. Example of expression: 7,<=9.
+                        For multiple threshold pairs, separate them with a semicolon. Example: "7,7;<=7,10" represents two threshold pairs.
+  -list {partitions_summary,sample_of_interest}, --list {partitions_summary,sample_of_interest}
+                        [OPTIONAL] Specify the names of the columns present in the partitions_summary.tsv or
+                        SAMPLES_OF_INTEREST_partitions_summary.tsv file.
+  -rto, --repeat_threshold_outbreak
+                        [OPTIONAL] This argument can only be used after of a previous analysis of threshold_outbreak
+                        and generate a second HTML report.
   -n_stab N_STABILITY, --n_stability N_STABILITY
-                        [OPTIONAL] Range of threshold at which the cluster composition can be consistent/stable.
+                        [OPTIONAL] Range of threshold which the cluster composition can be similar.
   -thr_stab THR_STABILITY, --thr_stability THR_STABILITY
-                        [OPTIONAL] The neighborhood Adjusted Wallace Coefficient (nAWC) threshold is used to determine if a clustering threshold is considered consistent or stable.
+                        [OPTIONAL] The neighborhood Adjusted Wallace Coefficient (nAWC) threshold used to determine if
+                        a clustering threshold is considered consistent or stable 
 ```
 ### Examples of command-line usage with:
   #### Manual Installation using:
@@ -193,7 +217,7 @@ python EvalTree.py -i1 X_partitions.tsv -i2 Y_partitions.tsv
 ```
  - Two ReporTree folders to generate clustering visualizations
 ```bash
-python EvalTree.py -i1 input1 -i2 input2 -o output -ps partitions_summary -pt MST-7x1.0 -cp name_column -to "MST-7x1.0,MST-7x1.0;<=MST-7x1.0,MST-9x1.0"
+python EvalTree.py -i1 input1 -i2 input2 -o output -ps partitions_summary -pt 7 -cp name_column -to "7,7;<=7,9"
 ```
   #### Installation via Conda OR PyPi using:
   - Two input files
