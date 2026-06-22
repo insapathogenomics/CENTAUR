@@ -207,7 +207,10 @@ pip install evaltree
                         [OPTIONAL] Range of threshold which the cluster composition can be similar.
   -thr_stab THR_STABILITY, --thr_stability THR_STABILITY
                         [OPTIONAL] The neighborhood Adjusted Wallace Coefficient (nAWC) threshold used to determine if
-                        a clustering threshold is considered consistent or stable 
+                        a clustering threshold is considered consistent or stable.
+   -ttc TRADITIONAL_TYPING_CATEGORY, --traditional_typing_category TRADITIONAL_TYPING_CATEGORY
+                        [OPTIONAL] Select the values of the category of traditional typing (e.g., serotype, sequence
+                        type), with high number of samples.
 ```
 ### Examples of command-line usage with:
   #### Manual Installation using:
