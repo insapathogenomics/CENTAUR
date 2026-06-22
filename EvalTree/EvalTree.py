@@ -6,8 +6,8 @@ By Joana Gomes Pereira
 @INSA
 
 """
-version = "1.0.2"
-last_updated = "2025-11-28"
+version = "1.0.3"
+last_updated = "2026-06-22"
 
 import datetime
 import argparse
