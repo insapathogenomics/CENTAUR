@@ -982,7 +982,7 @@ def get_heatmap(output, i1_prefix, i2_prefix, threshold, log):
     fig_heatmap.update_layout(margin=dict(l=0, r=0, t=20, b=0))
     fig_heatmap.write_image(f'{output}/{i1_prefix}_vs_{i2_prefix}_heatmap.png', format = "png")
 
-    return fig_heatmap
+    return fig_heatmap, n_lines, n_column
 
 def get_tendency(output, prefix_both, threshold, log):
     
@@ -1484,14 +1484,13 @@ def check_structure_lines_column_plots(check_columns, result_df, plots_category_
                         )
                     ],
                     # Margins to prevent cutting off text or chart elements
-                    margin=dict(t=120, b=150, l=60, r=60)  # space for title, legend, and annotations
-                )
+                    margin=dict(t=120, b=150, l=60, r=60))
 
-                fig.write_image(f'{output}/{prefix}_{mst}_{col}_{cluster_rename}.png', format="png")              
-                result_dict = {'A': mst, 'B': col, 'C': fig}    
+                fig.write_image(f'{output}/{prefix}_{mst}_{col}_{cluster_rename}.png', format="png")
+                result_dict = {'A': mst, 'B': col, 'C': fig}
                 results_list.append(result_dict)
                 strings.append(f"\t\tAnalyzing threshold {mst}, column {col}.")
-                
+
             else:
                 print_log(f'\tError: INVALID values present in the line with the {col} column at the {mst}: {row[col]}.\n', log)
                 results_list = None
@@ -1594,7 +1593,7 @@ def get_file_partition_by_threshold (partition_matrix, prefix, output, log):
 
     order_col = ["pipeline", "threshold", "partitions"]
     info_partitions = {"pipeline": [], "threshold": [], "partitions": []}
-    
+   
     partitions = pd.read_table(partition_matrix)
    
     for i in range(1,len(partitions.columns)):
@@ -1604,7 +1603,7 @@ def get_file_partition_by_threshold (partition_matrix, prefix, output, log):
         info_partitions["partitions"].append(len(clusters))
 
     cluster_partition_matrix = pd.DataFrame(data = info_partitions, columns = order_col)
-        
+    
     if '-' in partition_matrix:
         file_partition_by_threshold = (f'{output}/{prefix}_clusters_partitions-filtered.tsv')
     else:
@@ -1833,7 +1832,6 @@ def change_processing_data(final_df, i1_prefix, i2_prefix, output, log):
     #print_log(f'\n---------------------------------------------- Function: change_processing_data----------------------------------------------\n', log)
  
     #df_final = final_df.rename(columns={"Finish": "temp"})
-    
     df = final_df.iloc[::-1]
     df_final = df.rename(columns={"Finish": "temp"})
    
@@ -1863,12 +1861,14 @@ def change_processing_data(final_df, i1_prefix, i2_prefix, output, log):
                     yaxis = dict(showticklabels=False),  legend=dict( orientation="h",yanchor="bottom",y=-0.35,xanchor="center", x=0.5), margin=dict(l=0, r=0, t=20, b=0))
            
     if i2_prefix is None:
-         prefix=f'{i1_prefix}'
+        prefix=f'{i1_prefix}'
+        #final_df.to_csv(f"{output}/{prefix}_sorted_stabilityBlocks.tsv", sep="\t", index=False)
     else:
         prefix=f'{i1_prefix}_vs_{i2_prefix}'
+        #final_df.to_csv(f"{output}/{prefix}_sorted_stabilityBlocks.tsv", sep="\t", index=False)
 
     fig_st.write_image(f'{output}/{prefix}_StableRegions.png', format='png')
-
+    
     return fig_st
 
 #################################################################### OUTBREAKS ###############################################################
@@ -2522,6 +2522,13 @@ def create_html(log, file_path_report):
         }}
 
         .compact {{margin: 2px 0; line-height: 1.2;}}
+
+        .heatmap-container {{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }}
     </style>
 </head>
 <body>
@@ -2609,11 +2616,8 @@ def get_clusters(mst_groups, prefix):
             html_content+=f'<div class="image-row">\n'   
 
             for image in images:
-                #width_percent = 25
                 fig_html=pio.to_html(image, include_plotlyjs = 'cdn', full_html = False)
                 html_content += f'<div class="image-item">{fig_html}</div>\n' 
-                #html_content += f'<div class="image-item" style="flex: 0 0 {width_percent}%; max-width: {width_percent}%;">{fig_html}</div>\n'
-                 
             html_content += f"</div>\n" 
         html_content += f'</div>\n'
     html_content += f'</div>\n' 
@@ -2672,27 +2676,68 @@ def congruence_stability(fig_html_st, prefix, prefix_2, n_stability, thr_stabili
 
 
     return html_content
-    
-def congruence_heatmap(fig_html_heatmap, prefix_both):
 
-    split_prefix=prefix_both.split('_')
-    first=split_prefix[0]
-    second=split_prefix[-1]
+def congruence_heatmap(prefix_both, html_str, n_lines, n_column):
 
-    html_content=f"""
-        <h3> Congruence score </h3>
-        <div class='image-heatmap'>{fig_html_heatmap} </div>
-            <p class="compact"> The heatmap presents a pairwise comparison of clustering results obtained from two pipelines, {first} and {second}, at all possible distance thresholds.</p>
-            <p class="compact"> For each threshold, the cluster composition generated by two pipelines are compared, and a congruence score is computed (CS).</p>
-            <p class="compact"> The CS is based on Adjusted Wallace coefficient (AWC) and Adjusted Rand (AR).</p>
-            <p class="compact"> The AWC measures the probability that two samples that cluster together by one method (at a given threshold level) will also cluster together 
-            by another one (at a given threshold level). This calculation is performed in both directions (method A → method B and method B → method A) for all thresholds.</p>
-            <p class="compact"> AR evaluates the overall agreement between the typing methods. The congruence score (CS= AWC A→B + AWC B→A + AR) ranges from 0 indicating \
-            low congruence, to 3 indicating absolute congruence.</p>            
-            <p class="compact"> Detailed information is available in the <code> {prefix_both}_final_score.tsv </code> file.</p>
+    split_prefix = prefix_both.split('_')
+    first = split_prefix[0]
+    second = split_prefix[-1]
+
+    html_content = f"""
+    <h3> Congruence score </h3>
+
+    <div class="heatmap-container">
+        <label>X min:</label>
+        <input type="number" id="xmin" value="0" min="0" max="{n_column}">
+
+        <label>X max:</label>
+        <input type="number" id="xmax" value="{n_column}" min="0" max="{n_column}">
+
+        <br><br>
+
+        <label>Y min:</label>
+        <input type="number" id="ymin" value="0" min="0" max="{n_lines}">
+
+        <label>Y max:</label>
+        <input type="number" id="ymax" value="{n_lines}" min="0" max="{n_lines}">
+
+        <br><br>
+
+        <button onclick="updateRange()">Apply</button>
+    </div>
+
+    <br>
+    <div class="heatmap-container"> {html_str} </div>
+
+    <script>
+    function updateRange() {{
+        let xmin = parseFloat(document.getElementById("xmin").value);
+        let xmax = parseFloat(document.getElementById("xmax").value);
+        let ymin = parseFloat(document.getElementById("ymin").value);
+        let ymax = parseFloat(document.getElementById("ymax").value);
+
+        if (isNaN(xmin) || isNaN(xmax) || isNaN(ymin) || isNaN(ymax)) {{
+            alert("Please enter valid numbers.");
+            return;
+        }}
+
+        if (xmin >= xmax || ymin >= ymax) {{
+            alert("Min must be smaller than max.");
+            return;
+        }}
+
+        Plotly.relayout("my_heatmap", {{
+            'xaxis.range': [xmin, xmax],
+            'yaxis.range': [ymin, ymax]
+        }});
+    }}
+    </script>
+
+    <p class="compact"> The heatmap presents a pairwise comparison of clustering results obtained from two pipelines, {first} and {second}, at all possible distance thresholds.</p>
+    <p class="compact"> The congruence score (CS) combines Adjusted Wallace coefficient and Adjusted Rand index.</p>
     """
-    return html_content
 
+    return html_content
 def congruence_tendency(fig_tendency_html, score_value, prefix_both, nr_point_method_1, nr_point_method_2):
 
     pipeline1=prefix_both.split('_vs_')[0]
@@ -2898,7 +2943,7 @@ def nr_thresholds (i1,i2):
     df2 = pd.read_table (i2)
     nr_columns_df1 = (len(df1.columns)-1)
     nr_columns_df2 = (len(df2.columns)-1)
-    
+        
     return nr_columns_df1, nr_columns_df2
     
 #####################################################################################################################################
@@ -3110,13 +3155,13 @@ def main():
         input1 = args.input1
     
     if args.input2:
-        input2=args.input2 
+        input2 = args.input2 
     
     folders, files = check_input_argument(input1, input2)
     print(f'Checking inputs:')
      
     data_folder = []
-    if folders !=[]:
+    if folders != []:
 
         for folder in folders:
             is_folder_empty(folder)   
@@ -3309,7 +3354,37 @@ def main():
     print_log("Start: " + str(start)+"\n", log)
     print_log(f'Output directory: {output}\n', log)
     
-    #-----------------------------------------------
+    #------------------------------------------------------------------------------------------------------------------------------------
+    #  Check the samples in partition tables 
+
+    if len(inputs_variables) == 2:
+        partitions1=inputs_variables[0][0]
+        partitions2=inputs_variables[1][0]
+
+        if partitions1 is not None and partitions2 is not None:
+            df1 = pd.read_csv(partitions1, sep="\t")
+            list_samples1 = df1.iloc[0:, 0].tolist()
+
+            df2 = pd.read_csv(partitions2, sep="\t")
+            list_samples2 = df2.iloc[0:, 0].tolist()
+
+            set1 = set(list_samples1)
+            set2 = set(list_samples2)
+
+            diff1 = set1 - set2  
+            diff2 = set2 - set1  
+
+            if diff1 or diff2:
+                print_log("Warning: Samples differ between the two partitions!", log)
+                if diff1:
+                    print_log(f"Samples in {inputs_variables[0][0]} but not in partition2: " + ", ".join(diff1), log)
+                if diff2:
+                    print_log(f"Samples in {inputs_variables[1][0]} but not in partition1: " + ", ".join(diff2), log)
+            else:
+                print_log("All samples match between the two partitions.", log)
+
+
+    #------------------------------------------------------------------------------------------------------------------------------------
     # STAR HTML  
 
     if not repeat_threshold_outbreak:
@@ -3319,17 +3394,18 @@ def main():
     else:
         file_path_report = os.path.join(output, f'{prefix_both}_2ºRUN_report.html')
         html_content = create_html(log, file_path_report)
-        html_content += body_html(start, command_line,version)    
+        html_content += body_html(start, command_line,version)
         html_report = write_html(html_content,file_path_report, log)
 
-    #-------------------------------------------------------------------------------------------------------------------------------
+
+    #------------------------------------------------------------------------------------------------------------------------------------
     if not repeat_threshold_outbreak: 
 
-        #-------------------------------------------------------------------------------------------------------------------------------
+        #--------------------------------------------------------------------------------------------------------------------------------
         if inputs_variables:
             for sub in inputs_variables:
 
-                #-------------------------------------------------------------------------------------------------------------------------------
+                #------------------------------------------------------------------------------------------------------------------------
                 # MODULE 1 - SEQUENCE TYPE
                 if len(sub) == 6:
 
@@ -3343,7 +3419,7 @@ def main():
                         fig_html = pio.to_html(fig_clusters, include_plotlyjs='cdn', full_html=False)
                         html_content += sequence_type_image(fig_html)
 
-        #-------------------------------------------------------------------------------------------------------------------------------       
+        #-------------------------------------------------------------------------------------------------------------------------------
         list_partition_by_threshold=[]
         category_colors = {'Others':'#000000'}
 
@@ -3353,7 +3429,7 @@ def main():
                 prefix = sub[1]
                 directory = sub[2]
 
-                #-------------------------------------------------------------------------------------------------------------------------------
+                #-----------------------------------------------------------------------------------------------------------------------
                 # MODULE 2 - Characterization of the ONE pipeline (Nr_partitions vs Nr_thresholds)
                 if len(sub) == 7 or (len(sub) == 6 and sub[3] == True): 
                 
@@ -3379,7 +3455,7 @@ def main():
                 if go_clustering == False:
                     html_content += f'</div>\n'  
 
-                #----------------------------------------------------------------------- 
+                #---------------------------------------------------------------------------------------------------------------------
                 # MODULE 3 - REPORTREE clustering visualization
                 if len(sub) == 7:  #folder
                     partitions_summary = sub[3]
@@ -3428,6 +3504,7 @@ def main():
 
                                             if results_list is not None:
                                                 mst_groups = organize_clusters(results_list)
+
                                                 html_content += get_clusters(mst_groups, prefix)
                                             else:
                                                 html_content += close_painel(prefix,"Error: Impossible to produce cluster plots.")
@@ -3468,7 +3545,7 @@ def main():
                     html_content += summary_partition_threshold(fig_html, prefix_both)
 
         #----------------------------------------------------------------------- 
-        # MODULE 4.2 - Stability regions #or (len(sub)==6 and sub[3]==True):  
+        #MODULE 4.2 - Stability regions #or (len(sub)==6 and sub[3]==True):  
         print_log(f"\tIdentifying cluster stability regions for each pipeline ...", log)
         print_log(f"\t\tRunning comparing_partitions_v2.py in “stability” mode.", log)
 
@@ -3521,12 +3598,9 @@ def main():
             if len(prefix_df) == 2:
                 prefix=prefix_df[0]
                 prefix_2=prefix_df[1]
-
             else:
                 prefix_2 = None
                 prefix = prefix_df[0]
-               
-
         if  go_stability == True:
             fig_st = change_processing_data(df, prefix, prefix_2, output, log)
             print_log(f"\t\tDone.\n", log)
@@ -3545,10 +3619,9 @@ def main():
             path_all_correspondence_lower = management_main_scripts(comparing_partitions_script, get_best_part_correspondence_script, remove_hifen_script, i1_matrix, i2_matrix, prefix_both, output, score_value, python, log)
 
             #Final score
-            fig_heatmap = get_heatmap(output, i1_prefix, i2_prefix, threshold, log)
-            fig_html_heatmap = pio.to_html(fig_heatmap, include_plotlyjs='cdn',full_html=False)
-            html_content += congruence_heatmap(fig_html_heatmap, prefix_both)
-                
+            fig_heatmap, n_lines, n_column = get_heatmap(output, i1_prefix, i2_prefix, threshold, log)
+            html_str = fig_heatmap.to_html(include_plotlyjs='cdn', full_html=False, div_id="my_heatmap")
+            html_content += congruence_heatmap(prefix_both, html_str, n_lines, n_column)   
             #----------------------------------------------------------------------- 
             # Get best correspondence          
             
