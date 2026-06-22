@@ -6,7 +6,7 @@ By Joana Gomes Pereira
 @INSA
 
 """
-version = "1.0.3"
+version = "1.0.4"
 last_updated = "2026-06-22"
 
 import datetime
@@ -3013,7 +3013,7 @@ def main():
 
     parser.add_argument('-v', '--version',
         action='version',
-        version='EvalTree 1.0.2, last update 2025-11-28', 
+        version=f'EvalTree {version}, last update {last_updated}', 
         help='[OPTIONAL] Specify the version number of EvalTree.')
 
     parser.add_argument("-i1", "--input1",
